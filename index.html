@@ -44,7 +44,7 @@ textarea{height:110px;resize:vertical}
 .bottom button{background:none;border:0;color:#aaa;font-size:23px}
 .bottom button.active{color:white}
 .empty{text-align:center;color:#777;padding:35px 10px}
-.profiletop{text-align:center;padding:25px 0}
+.profiletop{text-align:center;padding:15px 0}
 .bigavatar{width:85px;height:85px;border-radius:50%;background:#292929;margin:auto;display:grid;place-items:center;font-size:32px}
 .stats{display:flex;justify-content:center;gap:25px;margin:20px}
 .stats div{text-align:center;color:#aaa;font-size:12px}
@@ -52,9 +52,12 @@ textarea{height:110px;resize:vertical}
 .smallbtn{padding:10px 16px;border-radius:8px;background:#eee;color:#111;border:0;font-weight:bold}
 .topbutton{background:none;border:0;color:white;font-size:13px}
 .userresult{display:flex;align-items:center;gap:12px;padding:14px 5px;border-bottom:1px solid #292929}
-.userinfo{flex:1;min-width:0}
+.userinfo{flex:1;min-width:0;cursor:pointer}
+.userresult .avatar{cursor:pointer}
 .followbtn{padding:9px 13px;border-radius:8px;border:1px solid #555;background:transparent;color:white;font-weight:bold}
 .followbtn.following{background:#eee;color:#111;border-color:#eee}
+.backbtn{background:none;border:0;color:white;font-size:15px;padding:10px 0}
+.profile-actions{display:flex;justify-content:center;gap:10px;margin:15px}
 </style>
 </head>
 <body>
@@ -74,10 +77,8 @@ textarea{height:110px;resize:vertical}
 </div>
 <input id="email" type="email" placeholder="البريد الإلكتروني">
 <input id="password" type="password" placeholder="كلمة المرور">
-
-إنشاء حساب
-عندي حساب — تسجيل الدخول
-
+<button class="primary" id="authButton" onclick="signup()">إنشاء حساب</button>
+<button class="secondary" id="switchButton" onclick="switchAuth()">عندي حساب — تسجيل الدخول</button>
 <div id="authMessage"></div>
 </div>
 </section>
@@ -96,6 +97,7 @@ textarea{height:110px;resize:vertical}
 <div id="searchResults"></div>
 </section>
 <section id="profilePage" class="page">
+<button class="backbtn" id="profileBack" onclick="backFromProfile()">‹ رجوع</button>
 <div class="profiletop">
 <div class="bigavatar" id="profileAvatar">R</div>
 <h2 id="profileName">RABDAN</h2>
@@ -105,14 +107,13 @@ textarea{height:110px;resize:vertical}
 <div><strong id="followerCount">0</strong>متابعين</div>
 <div><strong id="followingCount">0</strong>يتابع</div>
 </div>
-
-تعديل اليوزر
-
+<div class="profile-actions" id="profileActions"></div>
+<div id="ownProfileButtons" style="display:none">
+<button class="smallbtn" onclick="editUsername()">تعديل اليوزر</button>
+<button class="secondary" onclick="logout()">تسجيل الخروج</button>
 </div>
-
-تسجيل الخروج
-
-<h3>منشوراتي</h3>
+</div>
+<h3>المنشورات</h3>
 <div id="myPosts"></div>
 </section>
 </main>
@@ -127,6 +128,7 @@ const SUPABASE_KEY = "sb_publishable_ykrE9V_vuL5LO4N2EXZ3EA_Bo2ZaMSG";
 const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser = null;
 let currentProfile = null;
+let viewedProfileId = null;
 let isLogin = false;
 let searchTimer = null;
 function message(text){
@@ -148,7 +150,8 @@ if(!email||!password){message('اكتب البريد الإلكتروني وكل
 if(password.length<6){message('كلمة المرور لازم تكون 6 أحرف على الأقل.');return}
 if(!isLogin&&!name){message('اكتب اليوزر.');return}
 if(!isLogin&&!/^[a-zA-Z0-9_]{3,20}$/.test(name)){
-message('اليوزر لازم يكون بالإنجليزي أو الأرقام أو _، من 3 إلى 20 حرف.');return;
+message('اليوزر لازم يكون بالإنجليزي أو الأرقام أو _، من 3 إلى 20 حرف.');
+return;
 }
 button.disabled=true;
 message('جاري الاتصال...');
@@ -209,8 +212,13 @@ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
 document.getElementById(id).classList.add('active');
 document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
 if(button)button.classList.add('active');
-if(id==='profilePage')loadMyProfile();
-if(id==='searchPage')document.getElementById('searchInput').focus();
+if(id==='profilePage'){
+viewedProfileId=currentUser.id;
+loadMyProfile();
+}
+if(id==='searchPage'){
+document.getElementById('searchInput').focus();
+}
 }
 async function createPost(){
 const input=document.getElementById('postText');
@@ -312,39 +320,79 @@ if(error){alert('تعذر إضافة التعليق: '+error.message);return}
 await loadFeed();
 }
 async function loadMyProfile(){
-if(!currentProfile)await loadProfile();
-if(!currentProfile)return;
-const name=currentProfile.display_name||currentProfile.username||'RABDAN';
-document.getElementById('profileName').innerText=name;
-document.getElementById('profileUsername').innerText='@'+(currentProfile.username||'');
-document.getElementById('profileAvatar').innerText=name.charAt(0).toUpperCase();
-const {data:posts}=await db.from('posts')
-.select('*').eq('user_id',currentUser.id)
+viewedProfileId=currentUser.id;
+await loadProfileView(currentUser.id);
+}
+async function loadProfileView(userId){
+const {data:profile,error}=await db.from('profiles')
+.select('*').eq('id',userId).single();
+if(error||!profile){
+alert('تعذر تحميل الحساب: '+(error?.message||'الحساب غير موجود'));
+return;
+}
+const isOwn=userId===currentUser.id;
+document.getElementById('profileName').innerText=
+profile.display_name||profile.username||'مستخدم';
+document.getElementById('profileUsername').innerText=
+'@'+(profile.username||'');
+document.getElementById('profileAvatar').innerText=
+(profile.display_name||profile.username||'R').charAt(0).toUpperCase();
+document.getElementById('ownProfileButtons').style.display=
+isOwn?'block':'none';
+const {data:posts,error:postsError}=await db.from('posts')
+.select('*').eq('user_id',userId)
 .order('created_at',{ascending:false});
+if(postsError){
+document.getElementById('myPosts').innerHTML=
+'<div class="empty">تعذر تحميل المنشورات.</div>';
+return;
+}
 const myPosts=posts||[];
 document.getElementById('postCount').innerText=myPosts.length;
 const {count:followers}=await db.from('follows')
 .select('*',{count:'exact',head:true})
-.eq('following_id',currentUser.id);
+.eq('following_id',userId);
 const {count:following}=await db.from('follows')
 .select('*',{count:'exact',head:true})
-.eq('follower_id',currentUser.id);
+.eq('follower_id',userId);
 document.getElementById('followerCount').innerText=followers||0;
 document.getElementById('followingCount').innerText=following||0;
-let totalLikes=0;
-for(const post of myPosts){
-const {count}=await db.from('likes')
-.select('*',{count:'exact',head:true})
-.eq('post_id',post.id);
-totalLikes+=count||0;
+const actions=document.getElementById('profileActions');
+if(isOwn){
+actions.innerHTML='';
+}else{
+const {data:follow}=await db.from('follows')
+.select('following_id')
+.eq('follower_id',currentUser.id)
+.eq('following_id',userId)
+.maybeSingle();
+const isFollowing=!!follow;
+actions.innerHTML=`
+<button class="followbtn ${isFollowing?'following':''}"
+onclick="toggleFollow('${userId}',${isFollowing})">
+${isFollowing?'تتابعه ✓':'متابعة'}
+</button>`;
 }
-document.getElementById('likeCount').innerText=totalLikes;
 document.getElementById('myPosts').innerHTML=myPosts.map(p=>`
 <div class="post">
 <div class="caption">${safe(p.content)}</div>
-<div class="time" style="padding:0 14px">${new Date(p.created_at).toLocaleString('ar-AE')}</div>
+<div class="time" style="padding:0 14px">
+${new Date(p.created_at).toLocaleString('ar-AE')}
 </div>
-`).join('')||'<div class="empty">ما عندك منشورات للحين.</div>';
+</div>
+`).join('')||'<div class="empty">ما عنده منشورات للحين.</div>';
+}
+async function openProfile(userId){
+viewedProfileId=userId;
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById('profilePage').classList.add('active');
+document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
+document.getElementById('profileName').innerText='جاري التحميل...';
+document.getElementById('myPosts').innerHTML='<div class="empty">جاري تحميل المنشورات...</div>';
+await loadProfileView(userId);
+}
+function backFromProfile(){
+showPage('searchPage',document.querySelectorAll('.bottom button')[1]);
 }
 async function editUsername(){
 const oldName=currentProfile.username||'';
@@ -398,15 +446,17 @@ alert('تعذر المتابعة: '+error.message);
 return;
 }
 }
+if(document.getElementById('searchPage').classList.contains('active')){
 await searchUsers();
+}
 if(document.getElementById('profilePage').classList.contains('active')){
-await loadMyProfile();
+await loadProfileView(viewedProfileId);
 }
 }
 async function searchUsers(){
 const input=document.getElementById('searchInput');
 const results=document.getElementById('searchResults');
-const query=input.value.trim().replace(/^@/, '');
+const query=input.value.trim().replace(/^@/,'');
 clearTimeout(searchTimer);
 if(!query){
 results.innerHTML='<div class="empty">اكتب يوزر للبحث عنه.</div>';
@@ -431,7 +481,7 @@ results.innerHTML='<div class="empty">ما حصلنا أي حساب بهذا ا�
 return;
 }
 const ids=data.map(u=>u.id);
-const {data:follows, error:followError}=await db.from('follows')
+const {data:follows,error:followError}=await db.from('follows')
 .select('following_id')
 .eq('follower_id',currentUser.id)
 .in('following_id',ids);
@@ -445,14 +495,17 @@ const display=user.display_name||user.username||'مستخدم';
 const isFollowing=followingIds.includes(user.id);
 return `
 <div class="userresult">
-<div class="avatar">${safe(display.charAt(0).toUpperCase())}</div>
-<div class="userinfo">
+<div class="avatar" onclick="openProfile('${user.id}')">
+${safe(display.charAt(0).toUpperCase())}
+</div>
+<div class="userinfo" onclick="openProfile('${user.id}')">
 <div class="username">${safe(display)}</div>
 <div class="handle">@${safe(user.username||'')}</div>
 </div>
 ${user.id===currentUser.id
 ? '<span class="muted">أنت</span>'
-: `<button class="followbtn ${isFollowing?'following':''}" onclick="toggleFollow('${user.id}',${isFollowing})">
+: `<button class="followbtn ${isFollowing?'following':''}"
+onclick="toggleFollow('${user.id}',${isFollowing})">
 ${isFollowing?'تتابعه ✓':'متابعة'}
 </button>`}
 </div>`;
