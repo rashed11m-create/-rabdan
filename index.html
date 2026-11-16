@@ -4,199 +4,323 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RABDAN</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#090909;color:white;font-family:Arial,sans-serif;padding-bottom:85px}
-header{height:65px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #242424;position:sticky;top:0;background:#090909;z-index:10}
+body{margin:0;background:#090909;color:white;font-family:Arial,sans-serif;padding-bottom:75px}
+header{height:65px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #292929;position:sticky;top:0;background:#090909;z-index:10}
 .logo{font-size:25px;font-weight:900;letter-spacing:3px}
 .logo span{color:#aaa}
 button{cursor:pointer}
-.icon{background:none;border:0;color:white;font-size:23px}
-.stories{display:flex;gap:14px;overflow-x:auto;padding:17px 14px;border-bottom:1px solid #222}
-.story{min-width:66px;text-align:center;font-size:11px;color:#bbb}
-.story img,.story .circle{width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid #aaa;padding:2px}
-.circle{display:grid;place-items:center;background:#202020;font-size:25px}
-main{max-width:520px;margin:auto}
-.post{border-bottom:1px solid #292929;padding-bottom:15px;margin-bottom:15px}
-.posthead{display:flex;align-items:center;gap:10px;padding:13px}
-.avatar{width:39px;height:39px;border-radius:50%;background:#303030;display:grid;place-items:center;font-weight:bold;overflow:hidden}
-.avatar img{width:100%;height:100%;object-fit:cover}
-.username{font-weight:bold;font-size:14px}
-.time{color:#777;font-size:11px;margin-top:4px}
-.postimg{width:100%;max-height:480px;object-fit:cover;background:#171717;display:block}
-.caption{padding:10px 14px;font-size:14px;line-height:1.7}
-.actions{display:flex;gap:17px;padding:5px 14px}
-.actions button{background:none;border:0;color:white;font-size:23px}
-.likes{padding:0 14px;font-size:13px;font-weight:bold}
-.commentline{padding:7px 14px;color:#aaa;font-size:13px}
-.bottom{position:fixed;bottom:0;left:0;right:0;height:67px;background:#101010;border-top:1px solid #292929;display:flex;justify-content:space-around;align-items:center;z-index:20}
-.bottom button{background:none;border:0;color:#aaa;font-size:23px}
-.bottom button.active{color:white}
+button:disabled{opacity:.5}
+main{max-width:540px;margin:auto}
 .page{display:none;padding:18px}
 .page.active{display:block}
+#feedPage{padding:0}
 .sectiontitle{font-size:22px;font-weight:bold;margin:10px 0 20px}
-input,textarea{width:100%;padding:13px;background:#171717;border:1px solid #333;border-radius:10px;color:white;margin:8px 0;font-size:14px}
-textarea{height:100px;resize:vertical}
+input,textarea{width:100%;padding:14px;background:#171717;border:1px solid #333;border-radius:10px;color:white;margin:8px 0;font-size:15px}
+textarea{height:110px;resize:vertical}
 .primary{width:100%;padding:14px;border:0;border-radius:10px;background:#eee;color:#111;font-weight:bold;font-size:15px;margin-top:10px}
-.upload{display:block;background:#202020;padding:15px;border-radius:10px;text-align:center;margin:10px 0;color:#ccc}
+.secondary{width:100%;padding:13px;border:1px solid #555;border-radius:10px;background:transparent;color:white;margin-top:10px}
+.authbox{padding:22px 18px;margin:30px 12px;background:#121212;border:1px solid #292929;border-radius:16px}
+.authlogo{text-align:center;font-size:32px;font-weight:900;letter-spacing:4px;margin:15px}
+.muted{color:#888;font-size:13px;line-height:1.7}
+#authMessage{font-size:13px;color:#ccc;margin-top:12px;line-height:1.6}
+.post{border-bottom:1px solid #292929;padding-bottom:15px;margin-bottom:15px}
+.posthead{display:flex;align-items:center;gap:10px;padding:13px}
+.avatar{width:40px;height:40px;border-radius:50%;background:#303030;display:grid;place-items:center;font-weight:bold}
+.username{font-weight:bold;font-size:14px}
+.time{color:#777;font-size:11px;margin-top:4px}
+.caption{padding:10px 14px;font-size:14px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.actions{display:flex;gap:18px;padding:5px 14px}
+.actions button{background:none;border:0;color:white;font-size:23px}
+.likes{padding:0 14px;font-size:13px;font-weight:bold}
+.commentline{padding:8px 14px;color:#aaa;font-size:13px}
+.commentbox{display:flex;gap:7px;padding:5px 14px}
+.commentbox input{margin:0;padding:10px;font-size:13px}
+.commentbox button{background:#eee;color:#111;border:0;border-radius:8px;padding:0 13px}
+.bottom{position:fixed;bottom:0;left:0;right:0;height:65px;background:#101010;border-top:1px solid #292929;display:flex;justify-content:space-around;align-items:center;z-index:20}
+.bottom button{background:none;border:0;color:#aaa;font-size:23px}
+.bottom button.active{color:white}
+.empty{text-align:center;color:#777;padding:35px 10px}
 .profiletop{text-align:center;padding:25px 0}
-.bigavatar{width:90px;height:90px;border-radius:50%;background:#292929;margin:auto;display:grid;place-items:center;font-size:35px}
+.bigavatar{width:85px;height:85px;border-radius:50%;background:#292929;margin:auto;display:grid;place-items:center;font-size:32px}
 .stats{display:flex;justify-content:center;gap:35px;margin:20px}
 .stats div{text-align:center;color:#aaa;font-size:12px}
 .stats strong{display:block;color:white;font-size:18px;margin-bottom:5px}
-.smallbtn{padding:9px 20px;border-radius:8px;background:#eee;border:0;font-weight:bold}
-.searchresult{padding:13px;border-bottom:1px solid #292929;display:flex;align-items:center;gap:12px}
-.empty{text-align:center;color:#777;padding:40px 10px}
+.smallbtn{padding:10px 22px;border-radius:8px;background:#eee;border:0;font-weight:bold}
+.topbutton{background:none;border:0;color:white;font-size:13px}
 </style>
 </head>
 <body>
 <header>
-<button class="icon" onclick="showPage('search')">⌕</button>
+<button class="topbutton" onclick="logout()">تسجيل خروج</button>
 <div class="logo">RAB<span>DAN</span></div>
-<button class="icon" onclick="showPage('create')">＋</button>
+<button class="topbutton" onclick="loadFeed()">↻ تحديث</button>
 </header>
 <main>
-<div id="feedPage" class="page active" style="padding:0">
-<div class="stories">
-<div class="story"><div class="circle">＋</div><p>قصتك</p></div>
-<div class="story"><div class="circle">R</div><p>RABDAN</p></div>
-<div class="story"><div class="circle">A</div><p>Ahmed</p></div>
-<div class="story"><div class="circle">M</div><p>Mohammed</p></div>
-<div class="story"><div class="circle">S</div><p>Salem</p></div>
+<section id="authPage" class="page active">
+<div class="authbox">
+<div class="authlogo">RABDAN</div>
+<p class="muted" style="text-align:center">مجتمعك، عالمك، مكانك.</p>
+<div id="signupFields">
+<input id="signupName" placeholder="اسم المستخدم">
 </div>
-<div id="posts"></div>
+<input id="email" type="email" placeholder="البريد الإلكتروني">
+<input id="password" type="password" placeholder="كلمة المرور">
+<button class="primary" id="authButton" onclick="signup()">إنشاء حساب</button>
+<button class="secondary" id="switchButton" onclick="switchAuth()">عندي حساب — تسجيل الدخول</button>
+<div id="authMessage"></div>
 </div>
-<div id="createPage" class="page">
-<div class="sectiontitle">إنشاء منشور</div>
-<input id="caption" placeholder="شو في خاطرك؟">
-<label class="upload">📷 اختر صورة من جهازك
-<input type="file" id="photo" accept="image/*" style="display:none">
-</label>
-<img id="preview" style="width:100%;display:none;border-radius:12px;margin-top:10px">
-<button class="primary" onclick="addPost()">نشر المنشور</button>
+</section>
+<section id="feedPage" class="page">
+<div style="padding:18px 15px;border-bottom:1px solid #292929">
+<div class="sectiontitle">الرئيسية</div>
+<textarea id="postText" placeholder="شو في خاطرك؟"></textarea>
+<button class="primary" onclick="createPost()">نشر المنشور</button>
 </div>
-<div id="searchPage" class="page">
-<div class="sectiontitle">استكشاف</div>
-<input id="searchInput" placeholder="ابحث عن مستخدم..." oninput="searchUsers()">
-<div id="searchResults"></div>
-</div>
-<div id="profilePage" class="page">
+<div id="posts"><div class="empty">جاري تحميل المنشورات...</div></div>
+</section>
+<section id="profilePage" class="page">
 <div class="profiletop">
-<div class="bigavatar">R</div>
-<h2 id="profileName">RABDAN User</h2>
-<p style="color:#888">@rabdan_user</p>
+<div class="bigavatar" id="profileAvatar">R</div>
+<h2 id="profileName">RABDAN</h2>
+<p class="muted" id="profileUsername"></p>
 <div class="stats">
 <div><strong id="postCount">0</strong>منشورات</div>
-<div><strong id="followers">0</strong>متابعون</div>
-<div><strong id="following">0</strong>يتابع</div>
+<div><strong id="likeCount">0</strong>إعجابات</div>
 </div>
-<button class="smallbtn" onclick="editProfile()">تعديل الملف الشخصي</button>
+<button class="smallbtn" onclick="editUsername()">تعديل الاسم</button>
 </div>
+<button class="secondary" onclick="logout()">تسجيل الخروج</button>
 <h3>منشوراتي</h3>
 <div id="myPosts"></div>
-</div>
-<div id="notificationsPage" class="page">
-<div class="sectiontitle">الإشعارات</div>
-<div class="empty">ما عندك إشعارات حالياً 🔔</div>
-</div>
+</section>
 </main>
-<nav class="bottom">
-<button class="active" onclick="showPage('feed')">⌂</button>
-<button onclick="showPage('search')">⌕</button>
-<button onclick="showPage('create')">＋</button>
-<button onclick="showPage('notifications')">♡</button>
-<button onclick="showPage('profile')">◉</button>
+<nav class="bottom" id="navigation" style="display:none">
+<button class="active" onclick="showPage('feedPage',this)">⌂</button>
+<button onclick="showPage('profilePage',this)">◉</button>
 </nav>
 <script>
-let posts=JSON.parse(localStorage.getItem('rabdan_posts')||'[]');
-let username=localStorage.getItem('rabdan_name')||'RABDAN User';
-let selectedImage='';
-const demo=[
-{id:1,user:'RABDAN',caption:'مرحباً بكم في RABDAN 🚀 بداية مجتمعنا الجديد!',image:'',likes:12,liked:false,time:'منصة RABDAN'},
-{id:2,user:'Ahmed',caption:'يوم جميل ✨',image:'',likes:8,liked:false,time:'منصة RABDAN'}
-];
-function save(){
-localStorage.setItem('rabdan_posts',JSON.stringify(posts));
+const SUPABASE_URL = "https://vhdzhnevsyxvvebqpqig.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ykrE9V_vuL5LO4N2EXZ3EA_Bo2ZaMSG";
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser = null;
+let currentProfile = null;
+let isLogin = false;
+function message(text){
+document.getElementById('authMessage').innerText=text;
 }
-function showPage(name){
-document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-document.getElementById(name+'Page').classList.add('active');
-document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
-const index={feed:0,search:1,create:2,notifications:3,profile:4}[name];
-document.querySelectorAll('.bottom button')[index].classList.add('active');
-if(name==='profile')renderProfile();
+function switchAuth(){
+isLogin=!isLogin;
+document.getElementById('authButton').innerText=isLogin?'تسجيل الدخول':'إنشاء حساب';
+document.getElementById('switchButton').innerText=isLogin?'إنشاء حساب جديد':'عندي حساب — تسجيل الدخول';
+document.getElementById('signupFields').style.display=isLogin?'none':'block';
+message('');
 }
-function renderPosts(){
-let all=[...posts,...demo];
-document.getElementById('posts').innerHTML=all.map(p=>`
-<div class="post">
-<div class="posthead">
-<div class="avatar">${p.user[0]}</div>
-<div><div class="username">${escapeHTML(p.user)}</div><div class="time">${p.time}</div></div>
-</div>
-${p.image?`<img class="postimg" src="${p.image}">`:''}
-${p.caption?`<div class="caption">${escapeHTML(p.caption)}</div>`:''}
-<div class="actions">
-<button onclick="likePost(${p.id})">${p.liked?'♥':'♡'}</button>
-<button onclick="commentPost()">♧</button>
-<button onclick="sharePost()">↗</button>
-</div>
-<div class="likes">${p.likes} إعجاب</div>
-<div class="commentline">كن أول من يعلّق...</div>
-</div>`).join('');
+async function signup(){
+const email=document.getElementById('email').value.trim();
+const password=document.getElementById('password').value;
+const name=document.getElementById('signupName').value.trim();
+const button=document.getElementById('authButton');
+if(!email||!password){message('اكتب البريد الإلكتروني وكلمة المرور.');return}
+if(password.length<6){message('كلمة المرور لازم تكون 6 أحرف على الأقل.');return}
+if(!isLogin&&!name){message('اكتب اسم المستخدم.');return}
+if(!isLogin&&!/^[a-zA-Z0-9_]{3,20}$/.test(name)){
+message('اسم المستخدم بالإنجليزي أو الأرقام أو _، من 3 إلى 20 حرف.');return;
 }
-function addPost(){
-let caption=document.getElementById('caption').value.trim();
-if(!caption&&!selectedImage){alert('اكتب شيئاً أو اختر صورة');return}
-let post={id:Date.now(),user:username,caption,image:selectedImage,likes:0,liked:false,time:'الآن'};
-posts.unshift(post);
-save();
-document.getElementById('caption').value='';
-document.getElementById('photo').value='';
-document.getElementById('preview').style.display='none';
-selectedImage='';
-renderPosts();
-showPage('feed');
-}
-document.getElementById('photo').addEventListener('change',function(e){
-let file=e.target.files[0];
-if(!file)return;
-if(file.size>3*1024*1024){alert('اختر صورة أقل من 3MB');return}
-let reader=new FileReader();
-reader.onload=function(){
-selectedImage=reader.result;
-document.getElementById('preview').src=selectedImage;
-document.getElementById('preview').style.display='block';
-};
-reader.readAsDataURL(file);
+button.disabled=true;
+message('جاري الاتصال...');
+let result;
+if(isLogin){
+result=await db.auth.signInWithPassword({email,password});
+}else{
+result=await db.auth.signUp({
+email,
+password,
+options:{data:{username:name,display_name:name}}
 });
-function likePost(id){
-let p=posts.find(x=>x.id===id);
-if(p){p.liked=!p.liked;p.likes+=p.liked?1:-1;save();renderPosts()}
 }
-function commentPost(){alert('ميزة التعليقات بنضيفها في التحديث القادم ❤️')}
-function sharePost(){if(navigator.share)navigator.share({title:'RABDAN',text:'شوف RABDAN!'});else alert('RABDAN ❤️')}
-function renderProfile(){
-document.getElementById('profileName').innerText=username;
-document.getElementById('postCount').innerText=posts.filter(p=>p.user===username).length;
-document.getElementById('myPosts').innerHTML=posts.filter(p=>p.user===username).map(p=>`
-<div class="post"><div class="caption">${escapeHTML(p.caption)}</div>
-${p.image?`<img class="postimg" src="${p.image}">`:''}</div>`).join('')||'<div class="empty">ما عندك منشورات بعد</div>';
+button.disabled=false;
+if(result.error){
+message('خطأ: '+result.error.message);
+return;
 }
-function editProfile(){
-let name=prompt('اكتب اسمك الجديد:',username);
-if(name&&name.trim()){username=name.trim();localStorage.setItem('rabdan_name',username);renderProfile()}
+if(!isLogin&&!result.data.session){
+message('تم إنشاء الحساب! افحص بريدك الإلكتروني واضغط رابط تأكيد الحساب، وبعدها سجّل الدخول.');
+return;
 }
-function searchUsers(){
-let q=document.getElementById('searchInput').value.toLowerCase();
-let users=['RABDAN','Ahmed','Mohammed','Salem'];
-document.getElementById('searchResults').innerHTML=users.filter(u=>u.toLowerCase().includes(q)).map(u=>`
-<div class="searchresult"><div class="avatar">${u[0]}</div><b>${u}</b></div>`).join('');
+if(result.data.session){
+await startApp(result.data.user);
 }
-function escapeHTML(s){
-return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-renderPosts();
+async function startApp(user){
+currentUser=user;
+await loadProfile();
+document.getElementById('authPage').classList.remove('active');
+document.getElementById('feedPage').classList.add('active');
+document.getElementById('navigation').style.display='flex';
+await loadFeed();
+}
+async function loadProfile(){
+const {data,error}=await db.from('profiles').select('*').eq('id',currentUser.id).single();
+if(error){
+console.error(error);
+alert('تعذر تحميل الملف الشخصي: '+error.message);
+return;
+}
+currentProfile=data;
+}
+function showPage(id,button){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
+if(button)button.classList.add('active');
+if(id==='profilePage')loadMyProfile();
+}
+async function createPost(){
+const input=document.getElementById('postText');
+const content=input.value.trim();
+if(!content){alert('اكتب شيئاً قبل النشر');return}
+const {error}=await db.from('posts').insert({
+user_id:currentUser.id,
+content:content
+});
+if(error){alert('تعذر النشر: '+error.message);return}
+input.value='';
+await loadFeed();
+alert('تم نشر منشورك بنجاح! 🎉');
+}
+async function loadFeed(){
+const container=document.getElementById('posts');
+container.innerHTML='<div class="empty">جاري تحميل المنشورات...</div>';
+const {data:posts,error}=await db.from('posts')
+.select('*').order('created_at',{ascending:false}).limit(50);
+if(error){
+container.innerHTML='<div class="empty">خطأ في تحميل المنشورات: '+safe(error.message)+'</div>';
+return;
+}
+if(!posts.length){
+container.innerHTML='<div class="empty">ما في منشورات للحين. كن أول شخص ينشر! ✨</div>';
+return;
+}
+const ids=[...new Set(posts.map(p=>p.user_id))];
+const {data:profiles}=await db.from('profiles').select('id,username,display_name').in('id',ids);
+const {data:likes}=await db.from('likes').select('post_id,user_id').in('post_id',posts.map(p=>p.id));
+const {data:comments}=await db.from('comments').select('id,post_id,user_id,content,created_at').in('post_id',posts.map(p=>p.id)).order('created_at',{ascending:true});
+const profileMap={};
+(profiles||[]).forEach(p=>profileMap[p.id]=p);
+container.innerHTML=posts.map(p=>{
+const profile=profileMap[p.user_id]||{};
+const userName=profile.display_name||profile.username||'مستخدم';
+const postLikes=(likes||[]).filter(l=>l.post_id===p.id);
+const liked=postLikes.some(l=>l.user_id===currentUser.id);
+const postComments=(comments||[]).filter(c=>c.post_id===p.id);
+return `
+<article class="post">
+<div class="posthead">
+<div class="avatar">${safe(userName.charAt(0).toUpperCase())}</div>
+<div>
+<div class="username">${safe(userName)}</div>
+<div class="time">${new Date(p.created_at).toLocaleString('ar-AE')}</div>
+</div>
+</div>
+<div class="caption">${safe(p.content||'')}</div>
+<div class="actions">
+<button onclick="toggleLike('${p.id}',${liked})">${liked?'♥':'♡'}</button>
+<button onclick="focusComment('${p.id}')">♧</button>
+</div>
+<div class="likes">${postLikes.length} إعجاب</div>
+${postComments.map(c=>{
+const cp=profileMap[c.user_id]||{};
+return `<div class="commentline"><b>${safe(cp.display_name||cp.username||'مستخدم')}:</b> ${safe(c.content)}</div>`;
+}).join('')}
+<div class="commentbox">
+<input id="comment-${p.id}" placeholder="اكتب تعليقاً...">
+<button onclick="addComment('${p.id}')">إرسال</button>
+</div>
+</article>`;
+}).join('');
+}
+async function toggleLike(postId,alreadyLiked){
+if(alreadyLiked){
+const {error}=await db.from('likes').delete().eq('post_id',postId).eq('user_id',currentUser.id);
+if(error){alert(error.message);return}
+}else{
+const {error}=await db.from('likes').insert({post_id:postId,user_id:currentUser.id});
+if(error){alert(error.message);return}
+}
+await loadFeed();
+}
+function focusComment(id){
+document.getElementById('comment-'+id)?.focus();
+}
+async function addComment(postId){
+const input=document.getElementById('comment-'+postId);
+const content=input.value.trim();
+if(!content)return;
+const {error}=await db.from('comments').insert({
+post_id:postId,
+user_id:currentUser.id,
+content
+});
+if(error){alert('تعذر إضافة التعليق: '+error.message);return}
+await loadFeed();
+}
+async function loadMyProfile(){
+if(!currentProfile)await loadProfile();
+const name=currentProfile?.display_name||currentProfile?.username||'RABDAN';
+document.getElementById('profileName').innerText=name;
+document.getElementById('profileUsername').innerText='@'+(currentProfile?.username||'');
+document.getElementById('profileAvatar').innerText=name.charAt(0).toUpperCase();
+const {data:posts}=await db.from('posts').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+const myPosts=posts||[];
+document.getElementById('postCount').innerText=myPosts.length;
+let totalLikes=0;
+for(const post of myPosts){
+const {count}=await db.from('likes').select('*',{count:'exact',head:true}).eq('post_id',post.id);
+totalLikes+=count||0;
+}
+document.getElementById('likeCount').innerText=totalLikes;
+document.getElementById('myPosts').innerHTML=myPosts.map(p=>`
+<div class="post"><div class="caption">${safe(p.content)}</div>
+<div class="time" style="padding:0 14px">${new Date(p.created_at).toLocaleString('ar-AE')}</div></div>
+`).join('')||'<div class="empty">ما عندك منشورات للحين.</div>';
+}
+async function editUsername(){
+const name=prompt('اكتب اسم العرض الجديد:',currentProfile.display_name||'');
+if(!name||!name.trim())return;
+const {error}=await db.from('profiles').update({display_name:name.trim()}).eq('id',currentUser.id);
+if(error){alert('تعذر تعديل الاسم: '+error.message);return}
+await loadProfile();
+await loadMyProfile();
+}
+async function logout(){
+if(!currentUser)return;
+await db.auth.signOut();
+currentUser=null;
+currentProfile=null;
+document.getElementById('navigation').style.display='none';
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById('authPage').classList.add('active');
+}
+function safe(value){
+return String(value??'').replace(/[&<>"']/g,c=>({
+'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
+}
+async function init(){
+const {data}=await db.auth.getSession();
+if(data.session){
+await startApp(data.session.user);
+}
+}
+db.auth.onAuthStateChange((event,session)=>{
+if(event==='SIGNED_OUT'){
+currentUser=null;
+}
+});
+init();
 </script>
 </body>
 </html>
