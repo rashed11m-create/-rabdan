@@ -28,7 +28,7 @@ textarea{height:110px;resize:vertical}
 #authMessage{font-size:13px;color:#ccc;margin-top:12px;line-height:1.6}
 .post{border-bottom:1px solid #292929;padding-bottom:15px;margin-bottom:15px}
 .posthead{display:flex;align-items:center;gap:10px;padding:13px}
-.avatar{width:40px;height:40px;border-radius:50%;background:#303030;display:grid;place-items:center;font-weight:bold}
+.avatar{width:40px;height:40px;border-radius:50%;background:#303030;display:grid;place-items:center;font-weight:bold;flex-shrink:0}
 .username{font-weight:bold;font-size:14px}
 .handle{color:#888;font-size:12px;margin-top:4px}
 .time{color:#777;font-size:11px;margin-top:4px}
@@ -46,15 +46,15 @@ textarea{height:110px;resize:vertical}
 .empty{text-align:center;color:#777;padding:35px 10px}
 .profiletop{text-align:center;padding:25px 0}
 .bigavatar{width:85px;height:85px;border-radius:50%;background:#292929;margin:auto;display:grid;place-items:center;font-size:32px}
-.stats{display:flex;justify-content:center;gap:35px;margin:20px}
+.stats{display:flex;justify-content:center;gap:25px;margin:20px}
 .stats div{text-align:center;color:#aaa;font-size:12px}
 .stats strong{display:block;color:white;font-size:18px;margin-bottom:5px}
-.smallbtn{padding:10px 22px;border-radius:8px;background:#eee;border:0;font-weight:bold;margin:4px}
+.smallbtn{padding:10px 16px;border-radius:8px;background:#eee;color:#111;border:0;font-weight:bold}
 .topbutton{background:none;border:0;color:white;font-size:13px}
 .userresult{display:flex;align-items:center;gap:12px;padding:14px 5px;border-bottom:1px solid #292929}
-.userresult .avatar{flex-shrink:0}
-.userinfo{flex:1}
-.userresult .handle{margin-top:5px}
+.userinfo{flex:1;min-width:0}
+.followbtn{padding:9px 13px;border-radius:8px;border:1px solid #555;background:transparent;color:white;font-weight:bold}
+.followbtn.following{background:#eee;color:#111;border-color:#eee}
 </style>
 </head>
 <body>
@@ -74,8 +74,10 @@ textarea{height:110px;resize:vertical}
 </div>
 <input id="email" type="email" placeholder="البريد الإلكتروني">
 <input id="password" type="password" placeholder="كلمة المرور">
-<button class="primary" id="authButton" onclick="signup()">إنشاء حساب</button>
-<button class="secondary" id="switchButton" onclick="switchAuth()">عندي حساب — تسجيل الدخول</button>
+
+إنشاء حساب
+عندي حساب — تسجيل الدخول
+
 <div id="authMessage"></div>
 </div>
 </section>
@@ -100,11 +102,16 @@ textarea{height:110px;resize:vertical}
 <p class="muted" id="profileUsername"></p>
 <div class="stats">
 <div><strong id="postCount">0</strong>منشورات</div>
-<div><strong id="likeCount">0</strong>إعجابات</div>
+<div><strong id="followerCount">0</strong>متابعين</div>
+<div><strong id="followingCount">0</strong>يتابع</div>
 </div>
-<button class="smallbtn" onclick="editUsername()">تعديل اليوزر</button>
+
+تعديل اليوزر
+
 </div>
-<button class="secondary" onclick="logout()">تسجيل الخروج</button>
+
+تسجيل الخروج
+
 <h3>منشوراتي</h3>
 <div id="myPosts"></div>
 </section>
@@ -163,11 +170,7 @@ return;
 }
 button.disabled=false;
 if(result.error){
-if(result.error.code==='23505'||result.error.message.toLowerCase().includes('duplicate')){
-message('هذا اليوزر مستخدم، اختَر يوزر ثاني.');
-}else{
 message('خطأ: '+result.error.message);
-}
 return;
 }
 if(!isLogin&&!result.data.session){
@@ -271,7 +274,7 @@ return `
 <div class="likes">${postLikes.length} إعجاب</div>
 ${postComments.map(c=>{
 const cp=profileMap[c.user_id]||{};
-return `<div class="commentline"><b>${safe(cp.display_name||cp.username||'مستخدم')} @${safe(cp.username||'')}:</b> ${safe(c.content)}</div>`;
+return `<div class="commentline"><b>${safe(cp.username?'@'+cp.username:cp.display_name||'مستخدم')}:</b> ${safe(c.content)}</div>`;
 }).join('')}
 <div class="commentbox">
 <input id="comment-${p.id}" placeholder="اكتب تعليقاً...">
@@ -320,6 +323,14 @@ const {data:posts}=await db.from('posts')
 .order('created_at',{ascending:false});
 const myPosts=posts||[];
 document.getElementById('postCount').innerText=myPosts.length;
+const {count:followers}=await db.from('follows')
+.select('*',{count:'exact',head:true})
+.eq('following_id',currentUser.id);
+const {count:following}=await db.from('follows')
+.select('*',{count:'exact',head:true})
+.eq('follower_id',currentUser.id);
+document.getElementById('followerCount').innerText=followers||0;
+document.getElementById('followingCount').innerText=following||0;
 let totalLikes=0;
 for(const post of myPosts){
 const {count}=await db.from('likes')
@@ -363,6 +374,35 @@ await loadProfile();
 await loadMyProfile();
 alert('تم تحديث اليوزر بنجاح! 🔥');
 }
+async function toggleFollow(userId,isFollowing){
+if(userId===currentUser.id){
+alert('ما تقدر تتابع نفسك!');
+return;
+}
+if(isFollowing){
+const {error}=await db.from('follows')
+.delete()
+.eq('follower_id',currentUser.id)
+.eq('following_id',userId);
+if(error){
+alert('تعذر إلغاء المتابعة: '+error.message);
+return;
+}
+}else{
+const {error}=await db.from('follows').insert({
+follower_id:currentUser.id,
+following_id:userId
+});
+if(error){
+alert('تعذر المتابعة: '+error.message);
+return;
+}
+}
+await searchUsers();
+if(document.getElementById('profilePage').classList.contains('active')){
+await loadMyProfile();
+}
+}
 async function searchUsers(){
 const input=document.getElementById('searchInput');
 const results=document.getElementById('searchResults');
@@ -390,8 +430,19 @@ if(!data||!data.length){
 results.innerHTML='<div class="empty">ما حصلنا أي حساب بهذا اليوزر.</div>';
 return;
 }
+const ids=data.map(u=>u.id);
+const {data:follows, error:followError}=await db.from('follows')
+.select('following_id')
+.eq('follower_id',currentUser.id)
+.in('following_id',ids);
+if(followError){
+results.innerHTML='<div class="empty">تعذر تحميل حالة المتابعة: '+safe(followError.message)+'</div>';
+return;
+}
+const followingIds=(follows||[]).map(f=>f.following_id);
 results.innerHTML=data.map(user=>{
 const display=user.display_name||user.username||'مستخدم';
+const isFollowing=followingIds.includes(user.id);
 return `
 <div class="userresult">
 <div class="avatar">${safe(display.charAt(0).toUpperCase())}</div>
@@ -399,6 +450,11 @@ return `
 <div class="username">${safe(display)}</div>
 <div class="handle">@${safe(user.username||'')}</div>
 </div>
+${user.id===currentUser.id
+? '<span class="muted">أنت</span>'
+: `<button class="followbtn ${isFollowing?'following':''}" onclick="toggleFollow('${user.id}',${isFollowing})">
+${isFollowing?'تتابعه ✓':'متابعة'}
+</button>`}
 </div>`;
 }).join('');
 },350);
