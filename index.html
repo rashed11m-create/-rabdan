@@ -245,7 +245,10 @@ font-size:11px;
 color:white;
 margin-top:-17px;
 }
-.sound-button{font-size:21px!important}
+.sound-button{
+font-size:21px!important;
+touch-action:manipulation;
+}
 .like-button{transition:transform .15s,color .15s}
 .like-button[data-liked="true"]{color:#ff3158}
 .video-follow{
@@ -486,7 +489,6 @@ font-size:17px;
 
 <main>
 
-<!-- LOGIN -->
 <section id="authPage" class="page active">
 <div class="authbox">
 <div class="authlogo">RABDAN</div>
@@ -506,14 +508,12 @@ font-size:17px;
 </div>
 </section>
 
-<!-- EXPLORE -->
 <section id="explorePage" class="page">
 <div id="videoFeed">
 <div class="empty">جاري تحميل الفيديوهات...</div>
 </div>
 </section>
 
-<!-- UPLOAD -->
 <section id="uploadPage" class="page">
 <h2 class="sectiontitle">نشر فيديو جديد 🎥</h2>
 <div class="upload-box">
@@ -529,7 +529,6 @@ font-size:17px;
 </div>
 </section>
 
-<!-- SEARCH -->
 <section id="searchPage" class="page">
 <h2 class="sectiontitle">البحث عن الأشخاص</h2>
 <input id="searchInput" placeholder="ابحث باليوزر مثل rashid" oninput="searchUsers()">
@@ -537,7 +536,6 @@ font-size:17px;
 <div id="searchResults"></div>
 </section>
 
-<!-- NOTIFICATIONS -->
 <section id="notificationsPage" class="page">
 <div class="notification-heading">
 <h2 class="sectiontitle">الإشعارات 🔔</h2>
@@ -548,7 +546,6 @@ font-size:17px;
 </div>
 </section>
 
-<!-- PROFILE -->
 <section id="profilePage" class="page">
 <button class="backbtn" id="profileBack" onclick="backFromProfile()" style="display:none">‹ رجوع</button>
 <div class="profiletop">
@@ -571,7 +568,6 @@ font-size:17px;
 
 </main>
 
-<!-- BOTTOM NAVIGATION -->
 <nav class="bottom" id="navigation" style="display:none">
 <button class="active" onclick="showPage('explorePage',this)" aria-label="الرئيسية">⌂</button>
 <button onclick="showPage('searchPage',this)" aria-label="البحث">⌕</button>
@@ -582,7 +578,6 @@ font-size:17px;
 <span id="notificationBadge" style="display:none;position:absolute;top:0;right:5px;background:red;color:white;border-radius:50%;font-size:10px;padding:3px 5px">0</span>
 </button>
 
-<!-- PROFILE ICON: PERSON -->
 <button onclick="showPage('profilePage',this)" aria-label="الملف الشخصي">
 <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="12" cy="8" r="4"></circle>
@@ -591,7 +586,6 @@ font-size:17px;
 </button>
 </nav>
 
-<!-- COMMENTS POPUP -->
 <div class="comment-overlay" id="commentOverlay" onclick="closeComments(event)">
 <div class="comment-panel" onclick="event.stopPropagation()">
 <div style="display:flex;justify-content:space-between;align-items:center">
@@ -619,7 +613,9 @@ let searchTimer=null;
 let activeCommentVideo=null;
 let videoObserver=null;
 let notificationInterval=null;
-let soundUnlocked=false;
+
+/* SOUND STATE */
+let soundEnabled=false;
 
 function safe(value){
 return String(value??'').replace(/[&<>"']/g,c=>({
@@ -807,7 +803,7 @@ const own=v.user_id===currentUser.id;
 
 return `
 <article class="video-card" data-video="${v.id}">
-<video src="${safe(publicVideoUrl(v.video_path))}" autoplay loop playsinline preload="metadata"></video>
+<video src="${safe(publicVideoUrl(v.video_path))}" autoplay muted loop playsinline preload="metadata"></video>
 <div class="video-gradient"></div>
 
 <div class="video-info">
@@ -822,7 +818,7 @@ ${!own?`<button class="video-follow ${following?'following':''}" onclick="toggle
 <small>${postLikes.length}</small>
 <button onclick="openComments('${v.id}')">♧</button>
 <small>${commentCount}</small>
-<button class="sound-button" onclick="toggleSound(this)">🔊</button>
+<button class="sound-button" onclick="toggleSound(this)">${soundEnabled?'🔊':'🔇'}</button>
 <button onclick="shareVideo('${v.id}')">↗</button>
 <small>مشاركة</small>
 </div>
@@ -832,17 +828,24 @@ ${!own?`<button class="video-follow ${following?'following':''}" onclick="toggle
 setupVideoObserver();
 }
 
-/* VIDEO SOUND */
+/* VIDEO SOUND - FIXED */
 function setupVideoObserver(){
 if(videoObserver)videoObserver.disconnect();
 
 videoObserver=new IntersectionObserver(entries=>{
 entries.forEach(entry=>{
 const video=entry.target.querySelector('video');
+const button=entry.target.querySelector('.sound-button');
+
 if(!video)return;
 
+video.muted=!soundEnabled;
+
+if(button){
+button.innerText=soundEnabled?'🔊':'🔇';
+}
+
 if(entry.isIntersecting&&entry.intersectionRatio>=0.6){
-video.muted=false;
 video.play().catch(()=>{});
 }else{
 video.pause();
@@ -850,41 +853,52 @@ video.pause();
 });
 },{threshold:[0,.6,1]});
 
-document.querySelectorAll('.video-card').forEach(card=>videoObserver.observe(card));
+document.querySelectorAll('.video-card').forEach(card=>{
+videoObserver.observe(card);
+});
 }
 
-/* UNLOCK AUDIO AFTER FIRST USER TOUCH */
-document.addEventListener('pointerdown',function enableVideoSound(){
-if(!currentUser)return;
-if(!document.getElementById('explorePage').classList.contains('active'))return;
-
-const visibleVideo=[...document.querySelectorAll('.video-card')].find(card=>{
-const rect=card.getBoundingClientRect();
-return rect.top<window.innerHeight&&rect.bottom>0;
-});
-
-if(!visibleVideo)return;
-
-const video=visibleVideo.querySelector('video');
-if(!video)return;
-
-video.muted=false;
-video.play().catch(()=>{});
-
-const soundButton=visibleVideo.querySelector('.sound-button');
-if(soundButton)soundButton.innerText='🔊';
-
-soundUnlocked=true;
-},{capture:true});
-
+/* SOUND BUTTON */
 function toggleSound(button){
 const card=button.closest('.video-card');
+if(!card)return;
+
 const video=card.querySelector('video');
+if(!video)return;
 
-video.muted=!video.muted;
-button.innerText=video.muted?'🔇':'🔊';
+/* Toggle sound preference for all videos */
+soundEnabled=!soundEnabled;
 
-if(!video.muted)video.play().catch(()=>{});
+/* Apply the same setting to every video */
+document.querySelectorAll('.video-card').forEach(item=>{
+const itemVideo=item.querySelector('video');
+const itemButton=item.querySelector('.sound-button');
+
+if(itemVideo){
+itemVideo.muted=!soundEnabled;
+}
+
+if(itemButton){
+itemButton.innerText=soundEnabled?'🔊':'🔇';
+}
+});
+
+/* Play the selected video from the user's tap */
+if(soundEnabled){
+video.muted=false;
+video.play().catch(()=>{
+video.muted=true;
+soundEnabled=false;
+
+document.querySelectorAll('.video-card').forEach(item=>{
+const itemVideo=item.querySelector('video');
+const itemButton=item.querySelector('.sound-button');
+
+if(itemVideo)itemVideo.muted=true;
+if(itemButton)itemButton.innerText='🔇';
+});
+});
+}
 }
 
 /* LIKES */
@@ -1474,6 +1488,7 @@ await db.auth.signOut();
 
 currentUser=null;
 currentProfile=null;
+soundEnabled=false;
 
 document.getElementById('notificationBadge').style.display='none';
 document.getElementById('navigation').style.display='none';
@@ -1509,6 +1524,7 @@ db.auth.onAuthStateChange((event)=>{
 if(event==='SIGNED_OUT'){
 currentUser=null;
 currentProfile=null;
+soundEnabled=false;
 
 if(notificationInterval){
 clearInterval(notificationInterval);
