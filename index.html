@@ -39,13 +39,16 @@ textarea{height:100px;resize:vertical}
 .video-card video{width:100%;height:100%;object-fit:cover;display:block;background:#111}
 .video-gradient{position:absolute;inset:0;background:linear-gradient(transparent 45%,rgba(0,0,0,.8));pointer-events:none}
 .video-info{position:absolute;bottom:22px;right:16px;left:85px;z-index:2}
-.video-user{font-size:15px;font-weight:bold;margin-bottom:8px}
+.video-user{font-size:15px;font-weight:bold;margin-bottom:8px;cursor:pointer}
 .video-caption{font-size:14px;line-height:1.6;overflow-wrap:anywhere}
 .video-date{font-size:11px;color:#ddd;margin-top:8px}
 .video-actions{position:absolute;bottom:35px;left:13px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:20px}
 .video-actions button{background:rgba(0,0,0,.35);border:0;color:white;font-size:27px;border-radius:50%;width:48px;height:48px}
+.video-actions button:active{transform:scale(.9)}
 .video-actions small{font-size:11px;color:white;margin-top:-17px}
 .sound-button{font-size:21px!important}
+.like-button{transition:transform .15s,color .15s}
+.like-button[data-liked="true"]{color:#ff3158}
 .video-follow{font-size:12px;padding:7px 10px;background:#fff;color:#111;border:0;border-radius:7px;margin-top:8px;font-weight:bold}
 .video-follow.following{background:#333;color:white}
 .upload-box{background:#151515;border:1px solid #333;border-radius:13px;padding:18px}
@@ -76,7 +79,10 @@ textarea{height:100px;resize:vertical}
 .comment-form{display:flex;gap:7px}
 .comment-form input{margin:5px 0}
 .comment-form button{border:0;border-radius:8px;padding:0 14px;background:#eee;color:#111}
-@media(max-width:400px){.video-info{left:75px}.video-actions{left:8px}}
+@media(max-width:400px){
+.video-info{left:75px}
+.video-actions{left:8px}
+}
 </style>
 </head>
 <body>
@@ -101,7 +107,7 @@ textarea{height:100px;resize:vertical}
 <div id="authMessage"></div>
 </div>
 </section>
-<section id="explorePage" class="page active">
+<section id="explorePage" class="page">
 <div id="videoFeed">
 <div class="empty">جاري تحميل الفيديوهات...</div>
 </div>
@@ -239,6 +245,7 @@ document.getElementById('authPage').classList.remove('active');
 document.getElementById('navigation').style.display='flex';
 showPage('explorePage',document.querySelector('.bottom button'));
 await loadExplore();
+openSharedVideoFromUrl();
 }
 async function loadProfile(){
 const {data,error}=await db.from('profiles')
@@ -310,11 +317,13 @@ return `
 ${!own?`<button class="video-follow ${following?'following':''}" onclick="toggleFollow('${v.user_id}',${following})">${following?'تتابعه ✓':'متابعة +'}</button>`:''}
 </div>
 <div class="video-actions">
-<button onclick="toggleVideoLike('${v.id}',${liked})">${liked?'♥':'♡'}</button>
+<button class="like-button" data-liked="${liked}" onclick="toggleVideoLike(this,'${v.id}')">${liked?'♥':'♡'}</button>
 <small>${postLikes.length}</small>
 <button onclick="openComments('${v.id}')">♧</button>
 <small>${commentCount}</small>
 <button class="sound-button" onclick="toggleSound(this)">🔇</button>
+<button onclick="shareVideo('${v.id}')">↗</button>
+<small>مشاركة</small>
 </div>
 </article>`;
 }).join('');
@@ -341,19 +350,91 @@ const video=card.querySelector('video');
 video.muted=!video.muted;
 button.innerText=video.muted?'🔇':'🔊';
 }
-async function toggleVideoLike(videoId,alreadyLiked){
+/* FAST LIKE */
+async function toggleVideoLike(button,videoId){
+if(button.dataset.busy==='true')return;
+const alreadyLiked=button.dataset.liked==='true';
+const countElement=button.nextElementSibling;
+const oldCount=parseInt(countElement.innerText,10)||0;
+const newLiked=!alreadyLiked;
+const newCount=Math.max(0,oldCount+(newLiked?1:-1));
+button.dataset.busy='true';
+button.dataset.liked=String(newLiked);
+button.innerText=newLiked?'♥':'♡';
+countElement.innerText=newCount;
+try{
+let result;
 if(alreadyLiked){
-const {error}=await db.from('video_likes').delete()
-.eq('video_id',videoId).eq('user_id',currentUser.id);
-if(error){alert(error.message);return}
+result=await db.from('video_likes').delete()
+.eq('video_id',videoId)
+.eq('user_id',currentUser.id);
 }else{
-const {error}=await db.from('video_likes').insert({
-video_id:videoId,user_id:currentUser.id
+result=await db.from('video_likes').insert({
+video_id:videoId,
+user_id:currentUser.id
 });
-if(error){alert(error.message);return}
 }
-await loadExplore();
+if(result.error){
+button.dataset.liked=String(alreadyLiked);
+button.innerText=alreadyLiked?'♥':'♡';
+countElement.innerText=oldCount;
+alert('تعذر حفظ اللايك: '+result.error.message);
 }
+}catch(error){
+button.dataset.liked=String(alreadyLiked);
+button.innerText=alreadyLiked?'♥':'♡';
+countElement.innerText=oldCount;
+alert('صار خطأ في الاتصال. حاول مرة ثانية.');
+}
+button.dataset.busy='false';
+}
+/* SHARE VIDEO */
+async function shareVideo(videoId){
+const shareUrl=location.origin+location.pathname+'?video='+encodeURIComponent(videoId);
+try{
+if(navigator.share){
+await navigator.share({
+title:'RABDAN',
+text:'شاهد هذا الفيديو على RABDAN 🎥',
+url:shareUrl
+});
+return;
+}
+if(navigator.clipboard&&window.isSecureContext){
+await navigator.clipboard.writeText(shareUrl);
+alert('تم نسخ رابط الفيديو! تقدر ترسله لربعك.');
+return;
+}
+const temporary=document.createElement('textarea');
+temporary.value=shareUrl;
+temporary.style.position='fixed';
+temporary.style.opacity='0';
+document.body.appendChild(temporary);
+temporary.select();
+const copied=document.execCommand('copy');
+temporary.remove();
+if(copied){
+alert('تم نسخ رابط الفيديو! تقدر ترسله لربعك.');
+}else{
+prompt('انسخ رابط الفيديو:',shareUrl);
+}
+}catch(error){
+if(error.name!=='AbortError'){
+alert('تعذرت المشاركة. حاول مرة ثانية.');
+}
+}
+}
+function openSharedVideoFromUrl(){
+const videoId=new URLSearchParams(location.search).get('video');
+if(!videoId)return;
+setTimeout(()=>{
+const card=document.querySelector(`[data-video="${CSS.escape(videoId)}"]`);
+if(card){
+card.scrollIntoView({behavior:'smooth'});
+}
+},500);
+}
+/* COMMENTS */
 async function openComments(videoId){
 activeCommentVideo=videoId;
 document.getElementById('commentOverlay').style.display='flex';
@@ -393,7 +474,10 @@ video_id:activeCommentVideo,
 user_id:currentUser.id,
 content
 });
-if(error){alert('تعذر إرسال التعليق: '+error.message);return}
+if(error){
+alert('تعذر إرسال التعليق: '+error.message);
+return;
+}
 input.value='';
 await openComments(activeCommentVideo);
 }
@@ -515,17 +599,23 @@ async function openProfileVideo(videoId){
 showPage('explorePage',document.querySelector('.bottom button'));
 await loadExplore();
 setTimeout(()=>{
-const card=document.querySelector(`[data-video="${videoId}"]`);
+const card=document.querySelector(`[data-video="${CSS.escape(videoId)}"]`);
 if(card)card.scrollIntoView({behavior:'smooth'});
 },300);
 }
 async function deleteVideo(videoId,path){
 if(!confirm('متأكد تبا تحذف الفيديو؟'))return;
 const {error:storageError}=await db.storage.from('videos').remove([path]);
-if(storageError){alert('تعذر حذف ملف الفيديو: '+storageError.message);return}
+if(storageError){
+alert('تعذر حذف ملف الفيديو: '+storageError.message);
+return;
+}
 const {error}=await db.from('videos').delete()
 .eq('id',videoId).eq('user_id',currentUser.id);
-if(error){alert('تعذر حذف بيانات الفيديو: '+error.message);return}
+if(error){
+alert('تعذر حذف بيانات الفيديو: '+error.message);
+return;
+}
 await loadProfileView(currentUser.id);
 }
 async function openProfile(userId){
@@ -596,13 +686,19 @@ if(userId===currentUser.id)return;
 if(isFollowing){
 const {error}=await db.from('follows').delete()
 .eq('follower_id',currentUser.id).eq('following_id',userId);
-if(error){alert('تعذر إلغاء المتابعة: '+error.message);return}
+if(error){
+alert('تعذر إلغاء المتابعة: '+error.message);
+return;
+}
 }else{
 const {error}=await db.from('follows').insert({
 follower_id:currentUser.id,
 following_id:userId
 });
-if(error){alert('تعذر المتابعة: '+error.message);return}
+if(error){
+alert('تعذر المتابعة: '+error.message);
+return;
+}
 }
 if(document.getElementById('searchPage').classList.contains('active'))await searchUsers();
 if(document.getElementById('profilePage').classList.contains('active'))await loadProfileView(viewedProfileId);
