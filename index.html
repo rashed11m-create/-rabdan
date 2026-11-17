@@ -1,6 +1,4 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -42,7 +40,7 @@ main{max-width:560px;margin:auto}.page{display:none;padding:18px}.page.active{di
 .video-info{position:absolute;bottom:22px;right:16px;left:85px;z-index:2}
 .video-user{font-size:15px;font-weight:bold;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:8px}
 .mini-avatar{width:29px;height:29px;border-radius:50%;object-fit:cover;background:#333}
-.video-caption{font-size:14px;line-height:1.6;overflow-wrap:anywhere}.video-date{font-size:11px;color:#ddd;margin-top:8px}
+.video-caption{font-size:14px;line-height:1.6;overflow-wrap:anywhere}.video-date{font-size:11px;color:#ddd;margin-top:8px}.tag-inline{border:0;background:transparent;color:#9ed0ff;padding:0 2px;font:inherit;font-weight:bold}.tag-view-count{position:absolute;bottom:7px;right:7px;background:rgba(0,0,0,.65);padding:4px 7px;border-radius:6px;font-size:11px;color:white;z-index:2}
 .video-actions{position:absolute;bottom:30px;left:10px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:13px}
 .video-actions button{background:rgba(0,0,0,.4);border:0;color:white;font-size:25px;border-radius:50%;width:44px;height:44px}
 .video-actions small{font-size:10px;color:white;margin-top:-12px}
@@ -106,6 +104,10 @@ main{max-width:560px;margin:auto}.page{display:none;padding:18px}.page.active{di
 
 <section id="searchPage" class="page">
 <h2 class="sectiontitle">البحث عن الأشخاص</h2><input id="searchInput" placeholder="ابحث باليوزر مثل rashid" oninput="searchUsers()"><div class="muted">اكتب اليوزر بدون علامة @</div><div id="searchResults"></div>
+<h2 class="sectiontitle" style="margin-top:30px">البحث عن الهاشتاقات #</h2>
+<input id="hashtagSearchInput" placeholder="مثال #UAE أو #سيارات" oninput="searchHashtags()">
+<div id="hashtagMessage" class="muted">اكتب هاشتاق للبحث عن الفيديوهات.</div>
+<div id="hashtagResults" class="video-grid"></div>
 </section>
 
 <section id="notificationsPage" class="page">
@@ -155,9 +157,12 @@ const SUPABASE_KEY="sb_publishable_ykrE9V_vuL5LO4N2EXZ3EA_Bo2ZaMSG";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,currentProfile=null,viewedProfileId=null,isLogin=false,searchTimer=null,activeCommentVideo=null,videoObserver=null,notificationInterval=null;
 let soundEnabled=false,feedMode='for_you',activeChatUser=null,chatRefresh=null;
+const viewedVideos=new Set();
 
 function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function say(id,t){document.getElementById(id).innerText=t;}
+function extractHashtags(text){return [...new Set((String(text||'').match(/#[a-zA-Z0-9_\u0600-\u06FF]+/g)||[]).map(x=>x.slice(1).toLowerCase()))];}
+function captionHTML(text){return safe(text).replace(/#([a-zA-Z0-9_\u0600-\u06FF]+)/g,(match,tag)=>`<button class="tag-inline" onclick="searchHashtag('${tag.toLowerCase()}')">#${tag}</button>`);}
 function avatarHTML(profile,cls='avatar'){const name=profile?.display_name||profile?.username||'R';return profile?.avatar_url?`<div class="${cls}"><img src="${safe(profile.avatar_url)}" alt=""></div>`:`<div class="${cls}">${safe(name.charAt(0).toUpperCase())}</div>`;}
 function switchAuth(){isLogin=!isLogin;document.getElementById('authButton').innerText=isLogin?'تسجيل الدخول':'إنشاء حساب';document.getElementById('switchButton').innerText=isLogin?'إنشاء حساب جديد':'عندي حساب — تسجيل الدخول';document.getElementById('signupFields').style.display=isLogin?'none':'block';say('authMessage','');}
 
@@ -216,17 +221,24 @@ if(!selected.length){container.innerHTML='<div class="empty">ما في فيدي�
 container.innerHTML=selected.map(v=>{
 const p=pmap[v.user_id]||{},name=p.display_name||p.username||'مستخدم',postLikes=likes.filter(l=>l.video_id===v.id),liked=postLikes.some(l=>l.user_id===currentUser.id),count=comments.filter(c=>c.video_id===v.id).length,own=v.user_id===currentUser.id,followed=following.has(v.user_id);
 return `<article class="video-card" data-video="${v.id}"><video src="${safe(publicVideoUrl(v.video_path))}" autoplay muted loop playsinline preload="metadata"></video><div class="video-gradient"></div>
-<div class="video-info"><div class="video-user" onclick="openProfile('${v.user_id}')">${avatarHTML(p,'mini-avatar')} @${safe(p.username||name)}</div><div class="video-caption">${safe(v.caption||'')}</div><div class="video-date">${new Date(v.created_at).toLocaleDateString('ar-AE')}</div>
+<div class="video-info"><div class="video-user" onclick="openProfile('${v.user_id}')">${avatarHTML(p,'mini-avatar')} @${safe(p.username||name)}</div><div class="video-caption">${captionHTML(v.caption||'')}</div><div class="video-date">${new Date(v.created_at).toLocaleDateString('ar-AE')} · 👁️ <span class="views-count">${Number(v.views_count)||0}</span></div>
 ${!own?`<button class="video-follow ${followed?'following':''}" onclick="toggleFollow('${v.user_id}',${followed})">${followed?'تتابعه ✓':'متابعة +'}</button>`:''}</div>
 <div class="video-actions"><button class="like-button" data-liked="${liked}" onclick="toggleVideoLike(this,'${v.id}')">${liked?'♥':'♡'}</button><small>${postLikes.length}</small><button onclick="openComments('${v.id}')">♧</button><small>${count}</small><button onclick="toggleSave(this,'${v.id}')" title="حفظ">${saved.has(v.id)?'🔖':'🔖'}</button><small>${saved.has(v.id)?'محفوظ':'حفظ'}</small><button class="sound-button" onclick="toggleSound(this)">${soundEnabled?'🔊':'🔇'}</button><button onclick="shareVideo('${v.id}')">↗</button></div></article>`;
 }).join('');setupVideoObserver();
 }
 function setupVideoObserver(){
 if(videoObserver)videoObserver.disconnect();
-videoObserver=new IntersectionObserver(entries=>entries.forEach(e=>{const v=e.target.querySelector('video');if(!v)return;v.muted=!soundEnabled;if(e.isIntersecting&&e.intersectionRatio>=.6)v.play().catch(()=>{});else v.pause();}),{threshold:[0,.6,1]});
+videoObserver=new IntersectionObserver(entries=>entries.forEach(e=>{const card=e.target,v=card.querySelector('video');if(!v)return;v.muted=!soundEnabled;if(e.isIntersecting&&e.intersectionRatio>=.6){v.play().catch(()=>{});const id=card.dataset.video;if(id&&!viewedVideos.has(id)){viewedVideos.add(id);recordVideoView(id,card);}}else v.pause();}),{threshold:[0,.6,1]});
 document.querySelectorAll('.video-card').forEach(c=>videoObserver.observe(c));
 }
 function toggleSound(btn){const card=btn.closest('.video-card'),v=card?.querySelector('video');if(!v)return;soundEnabled=!soundEnabled;document.querySelectorAll('.video-card').forEach(c=>{const x=c.querySelector('video'),b=c.querySelector('.sound-button');if(x)x.muted=!soundEnabled;if(b)b.innerText=soundEnabled?'🔊':'🔇';});if(soundEnabled)v.play().catch(()=>{v.muted=true;soundEnabled=false;document.querySelectorAll('.video-card video').forEach(x=>x.muted=true);document.querySelectorAll('.sound-button').forEach(x=>x.innerText='🔇');});}
+
+async function recordVideoView(id,card){
+const {error}=await db.rpc('record_video_view',{p_video_id:id});
+if(error){console.warn('View count error:',error.message);viewedVideos.delete(id);return;}
+const {data}=await db.from('videos').select('views_count').eq('id',id).maybeSingle();
+const counter=card?.querySelector('.views-count');if(counter&&data)counter.innerText=Number(data.views_count)||0;
+}
 
 async function toggleVideoLike(btn,id){
 if(btn.dataset.busy==='true')return;btn.dataset.busy='true';const was=btn.dataset.liked==='true',count=btn.nextElementSibling,old=Number(count.innerText)||0;
@@ -249,7 +261,11 @@ const {data:videos}=await db.from('videos').select('*').in('id',ids);
 box.innerHTML=(videos||[]).map(v=>`<div class="grid-video"><video src="${safe(publicVideoUrl(v.video_path))}" muted playsinline></video><button onclick="openProfileVideo('${v.id}')"></button></div>`).join('')||'<div class="empty">ما في فيديوهات.</div>';
 }
 async function shareVideo(id){const url=location.origin+location.pathname+'?video='+encodeURIComponent(id);try{if(navigator.share){await navigator.share({title:'RABDAN',text:'شاهد هذا الفيديو 🎥',url});return;}await navigator.clipboard.writeText(url);alert('تم نسخ الرابط!');}catch(e){if(e.name!=='AbortError')prompt('انسخ الرابط:',url);}}
-function openSharedVideoFromUrl(){const id=new URLSearchParams(location.search).get('video');if(id)setTimeout(()=>document.querySelector(`[data-video="${CSS.escape(id)}"]`)?.scrollIntoView({behavior:'smooth'}),500);}
+async function openSharedVideoFromUrl(){
+const id=new URLSearchParams(location.search).get('video');if(!id)return;
+feedMode='for_you';document.getElementById('forYouTab').classList.add('active');document.getElementById('followingTab').classList.remove('active');
+await loadExplore();setTimeout(()=>document.querySelector(`[data-video="${CSS.escape(id)}"]`)?.scrollIntoView({behavior:'smooth'}),500);
+}
 
 async function openComments(id){
 activeCommentVideo=id;document.getElementById('commentOverlay').style.display='flex';const box=document.getElementById('commentList');box.innerHTML='<div class="empty">جاري التحميل...</div>';
@@ -261,15 +277,33 @@ box.innerHTML=data.map(c=>`<div class="comment-row"><b>@${safe(map[c.user_id]?.u
 function closeComments(e){if(e&&e.target!==document.getElementById('commentOverlay'))return;document.getElementById('commentOverlay').style.display='none';activeCommentVideo=null;}
 async function addVideoComment(){const input=document.getElementById('commentInput'),content=input.value.trim();if(!content||!activeCommentVideo)return;const id=activeCommentVideo;const {error}=await db.from('video_comments').insert({video_id:id,user_id:currentUser.id,content});if(error){alert('تعذر إرسال التعليق: '+error.message);return;}input.value='';await openComments(id);}
 
+async function searchHashtags(){
+const raw=document.getElementById('hashtagSearchInput').value.trim();
+const tag=raw.replace(/^#+/,'').trim().toLowerCase();
+const box=document.getElementById('hashtagResults'),message=document.getElementById('hashtagMessage');
+if(!tag){box.innerHTML='';message.innerText='اكتب هاشتاق للبحث عن الفيديوهات.';return;}
+if(!/^[a-zA-Z0-9_\u0600-\u06FF]{1,40}$/.test(tag)){box.innerHTML='';message.innerText='اكتب هاشتاق صحيح بدون مسافات.';return;}
+message.innerText='جاري البحث...';box.innerHTML='';
+const {data,error}=await db.from('videos').select('id,video_path,views_count').contains('hashtags',[tag]).order('created_at',{ascending:false}).limit(60);
+if(error){message.innerText='تعذر البحث: '+error.message;return;}
+if(!data?.length){message.innerText='ما حصلنا فيديوهات بهذا الهاشتاق.';return;}
+message.innerText=`نتائج #${tag} (${data.length})`;
+box.innerHTML=data.map(v=>`<div class="grid-video"><video src="${safe(publicVideoUrl(v.video_path))}" muted playsinline preload="metadata"></video><button onclick="openProfileVideo('${v.id}')"></button><small class="tag-view-count">👁️ ${Number(v.views_count)||0}</small></div>`).join('');
+}
+function searchHashtag(tag){
+showPage('searchPage',document.querySelectorAll('.bottom button')[1]);
+const input=document.getElementById('hashtagSearchInput');input.value='#'+tag;searchHashtags();
+}
+
 function previewVideo(){const f=document.getElementById('videoFile').files[0],p=document.getElementById('videoPreview');if(!f)return;if(!f.type.startsWith('video/')){alert('اختَر فيديو فقط');return;}if(f.size>50*1024*1024){alert('حجم الفيديو أكبر من 50 MB');return;}say('fileName',f.name);p.src=URL.createObjectURL(f);p.style.display='block';}
 async function uploadVideo(){
-const f=document.getElementById('videoFile').files[0],caption=document.getElementById('videoCaption').value.trim(),btn=document.getElementById('uploadButton');
+const f=document.getElementById('videoFile').files[0],caption=document.getElementById('videoCaption').value.trim(),hashtags=extractHashtags(caption),btn=document.getElementById('uploadButton');
 if(!f){say('uploadMessage','اختَر فيديو أولاً.');return;}if(f.size>50*1024*1024){say('uploadMessage','حجم الفيديو أكبر من 50 MB.');return;}
 btn.disabled=true;say('uploadMessage','جاري رفع الفيديو...');
 const path=currentUser.id+'/'+Date.now()+'-'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
 const up=await db.storage.from('videos').upload(path,f,{contentType:f.type,upsert:false});
 if(up.error){btn.disabled=false;say('uploadMessage','تعذر رفع الفيديو: '+up.error.message);return;}
-const ins=await db.from('videos').insert({user_id:currentUser.id,video_path:path,caption});
+const ins=await db.from('videos').insert({user_id:currentUser.id,video_path:path,caption,hashtags});
 if(ins.error){await db.storage.from('videos').remove([path]);btn.disabled=false;say('uploadMessage','تعذر حفظ الفيديو: '+ins.error.message);return;}
 document.getElementById('videoFile').value='';document.getElementById('videoCaption').value='';document.getElementById('videoPreview').style.display='none';document.getElementById('videoPreview').src='';say('fileName','');btn.disabled=false;say('uploadMessage','تم نشر الفيديو بنجاح! 🎉');showPage('explorePage',document.querySelector('.bottom button'));await loadExplore();
 }
@@ -308,7 +342,7 @@ currentProfile=data;closeEditProfile();await loadProfileView(currentUser.id);
 }
 async function openProfile(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));document.getElementById('profileName').innerText='جاري التحميل...';await loadProfileView(id);}
 function backFromProfile(){showPage('searchPage',document.querySelectorAll('.bottom button')[1]);}
-async function openProfileVideo(id){showPage('explorePage',document.querySelector('.bottom button'));await loadExplore();setTimeout(()=>document.querySelector(`[data-video="${CSS.escape(id)}"]`)?.scrollIntoView({behavior:'smooth'}),300);}
+async function openProfileVideo(id){feedMode='for_you';document.getElementById('forYouTab').classList.add('active');document.getElementById('followingTab').classList.remove('active');showPage('explorePage',document.querySelector('.bottom button'));await loadExplore();setTimeout(()=>document.querySelector(`[data-video="${CSS.escape(id)}"]`)?.scrollIntoView({behavior:'smooth'}),300);}
 async function deleteVideo(id,path){if(!confirm('متأكد تبا تحذف الفيديو؟'))return;const st=await db.storage.from('videos').remove([path]);if(st.error){alert(st.error.message);return;}const {error}=await db.from('videos').delete().eq('id',id).eq('user_id',currentUser.id);if(error){alert(error.message);return;}await loadProfileView(currentUser.id);}
 
 async function searchUsers(){
@@ -374,9 +408,3 @@ init();
 </script>
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/rabdan_updated.html")
-path.write_text(html, encoding="utf-8")
-print(f"تم إنشاء الملف: {path.name}")
-print(f"حجم الملف: {path.stat().st_size:,} bytes")
