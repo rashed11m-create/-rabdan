@@ -2,69 +2,88 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>RABDAN</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#090909;color:white;font-family:Arial,sans-serif;padding-bottom:75px}
-header{height:65px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #292929;position:sticky;top:0;background:#090909;z-index:10}
-.logo{font-size:25px;font-weight:900;letter-spacing:3px}
-.logo span{color:#aaa}
+body{margin:0;background:#090909;color:white;font-family:Arial,sans-serif;padding-bottom:68px}
 button{cursor:pointer}
 button:disabled{opacity:.5}
+header{height:60px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #292929;background:#090909;position:sticky;top:0;z-index:10}
+.logo{font-size:25px;font-weight:900;letter-spacing:3px}
+.logo span{color:#aaa}
+.topbutton{background:none;border:0;color:white;font-size:13px}
 main{max-width:540px;margin:auto}
 .page{display:none;padding:18px}
 .page.active{display:block}
-#feedPage{padding:0}
+#explorePage{padding:0}
 .sectiontitle{font-size:22px;font-weight:bold;margin:10px 0 20px}
 input,textarea{width:100%;padding:14px;background:#171717;border:1px solid #333;border-radius:10px;color:white;margin:8px 0;font-size:15px}
-textarea{height:110px;resize:vertical}
+textarea{height:100px;resize:vertical}
 .primary{width:100%;padding:14px;border:0;border-radius:10px;background:#eee;color:#111;font-weight:bold;font-size:15px;margin-top:10px}
 .secondary{width:100%;padding:13px;border:1px solid #555;border-radius:10px;background:transparent;color:white;margin-top:10px}
 .authbox{padding:22px 18px;margin:30px 12px;background:#121212;border:1px solid #292929;border-radius:16px}
 .authlogo{text-align:center;font-size:32px;font-weight:900;letter-spacing:4px;margin:15px}
 .muted{color:#888;font-size:13px;line-height:1.7}
 #authMessage{font-size:13px;color:#ccc;margin-top:12px;line-height:1.6}
-.post{border-bottom:1px solid #292929;padding-bottom:15px;margin-bottom:15px}
-.posthead{display:flex;align-items:center;gap:10px;padding:13px}
-.avatar{width:40px;height:40px;border-radius:50%;background:#303030;display:grid;place-items:center;font-weight:bold;flex-shrink:0}
-.username{font-weight:bold;font-size:14px}
-.handle{color:#888;font-size:12px;margin-top:4px}
-.time{color:#777;font-size:11px;margin-top:4px}
-.caption{padding:10px 14px;font-size:14px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
-.actions{display:flex;gap:18px;padding:5px 14px}
-.actions button{background:none;border:0;color:white;font-size:23px}
-.likes{padding:0 14px;font-size:13px;font-weight:bold}
-.commentline{padding:8px 14px;color:#aaa;font-size:13px}
-.commentbox{display:flex;gap:7px;padding:5px 14px}
-.commentbox input{margin:0;padding:10px;font-size:13px}
-.commentbox button{background:#eee;color:#111;border:0;border-radius:8px;padding:0 13px}
 .bottom{position:fixed;bottom:0;left:0;right:0;height:65px;background:#101010;border-top:1px solid #292929;display:flex;justify-content:space-around;align-items:center;z-index:20}
-.bottom button{background:none;border:0;color:#aaa;font-size:23px}
+.bottom button{background:none;border:0;color:#aaa;font-size:23px;min-width:55px}
 .bottom button.active{color:white}
-.empty{text-align:center;color:#777;padding:35px 10px}
+.empty{text-align:center;color:#888;padding:35px 10px}
+.followbtn{padding:9px 13px;border-radius:8px;border:1px solid #555;background:transparent;color:white;font-weight:bold}
+.followbtn.following{background:#eee;color:#111;border-color:#eee}
+/* EXPLORE */
+#videoFeed{height:calc(100dvh - 125px);height:calc(100vh - 125px);overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain}
+.video-card{height:100%;min-height:450px;position:relative;scroll-snap-align:start;background:#111;overflow:hidden}
+.video-card video{width:100%;height:100%;object-fit:cover;display:block;background:#111}
+.video-gradient{position:absolute;inset:0;background:linear-gradient(transparent 45%,rgba(0,0,0,.8));pointer-events:none}
+.video-info{position:absolute;bottom:22px;right:16px;left:85px;z-index:2}
+.video-user{font-size:15px;font-weight:bold;margin-bottom:8px}
+.video-caption{font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.video-date{font-size:11px;color:#ddd;margin-top:8px}
+.video-actions{position:absolute;bottom:35px;left:13px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:20px}
+.video-actions button{background:rgba(0,0,0,.35);border:0;color:white;font-size:27px;border-radius:50%;width:48px;height:48px}
+.video-actions small{font-size:11px;color:white;margin-top:-17px}
+.sound-button{font-size:21px!important}
+.video-follow{font-size:12px;padding:7px 10px;background:#fff;color:#111;border:0;border-radius:7px;margin-top:8px;font-weight:bold}
+.video-follow.following{background:#333;color:white}
+.upload-box{background:#151515;border:1px solid #333;border-radius:13px;padding:18px}
+.file-label{display:block;text-align:center;padding:25px;border:2px dashed #555;border-radius:12px;color:#ddd;margin:12px 0}
+.file-label input{display:none}
+.preview{width:100%;max-height:350px;object-fit:contain;background:#000;border-radius:10px;display:none;margin-top:12px}
 .profiletop{text-align:center;padding:15px 0}
 .bigavatar{width:85px;height:85px;border-radius:50%;background:#292929;margin:auto;display:grid;place-items:center;font-size:32px}
 .stats{display:flex;justify-content:center;gap:25px;margin:20px}
 .stats div{text-align:center;color:#aaa;font-size:12px}
 .stats strong{display:block;color:white;font-size:18px;margin-bottom:5px}
-.smallbtn{padding:10px 16px;border-radius:8px;background:#eee;color:#111;border:0;font-weight:bold}
-.topbutton{background:none;border:0;color:white;font-size:13px}
-.userresult{display:flex;align-items:center;gap:12px;padding:14px 5px;border-bottom:1px solid #292929}
-.userinfo{flex:1;min-width:0;cursor:pointer}
-.userresult .avatar{cursor:pointer}
-.followbtn{padding:9px 13px;border-radius:8px;border:1px solid #555;background:transparent;color:white;font-weight:bold}
-.followbtn.following{background:#eee;color:#111;border-color:#eee}
-.backbtn{background:none;border:0;color:white;font-size:15px;padding:10px 0}
 .profile-actions{display:flex;justify-content:center;gap:10px;margin:15px}
+.userresult{display:flex;align-items:center;gap:12px;padding:14px 5px;border-bottom:1px solid #292929}
+.avatar{width:40px;height:40px;border-radius:50%;background:#303030;display:grid;place-items:center;font-weight:bold;flex-shrink:0}
+.userinfo{flex:1;min-width:0;cursor:pointer}
+.username{font-weight:bold;font-size:14px}
+.handle{color:#888;font-size:12px;margin-top:4px}
+.backbtn{background:none;border:0;color:white;font-size:15px;padding:10px 0}
+.video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.grid-video{aspect-ratio:9/16;background:#171717;position:relative;overflow:hidden}
+.grid-video video{width:100%;height:100%;object-fit:cover}
+.grid-video button{position:absolute;inset:0;background:transparent;border:0}
+.grid-video .delete-video{position:absolute;top:5px;left:5px;inset:auto;background:rgba(0,0,0,.7);color:white;border:0;border-radius:6px;padding:5px;font-size:11px}
+.comment-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:40;align-items:flex-end;justify-content:center}
+.comment-panel{background:#181818;width:100%;max-width:540px;border-radius:18px 18px 0 0;padding:18px;max-height:70vh;display:flex;flex-direction:column}
+.comment-list{overflow-y:auto;min-height:100px;max-height:40vh}
+.comment-row{padding:10px 0;border-bottom:1px solid #333;font-size:13px;line-height:1.6}
+.comment-form{display:flex;gap:7px}
+.comment-form input{margin:5px 0}
+.comment-form button{border:0;border-radius:8px;padding:0 14px;background:#eee;color:#111}
+@media(max-width:400px){.video-info{left:75px}.video-actions{left:8px}}
 </style>
 </head>
 <body>
 <header>
-<button class="topbutton" onclick="logout()">تسجيل خروج</button>
+<button class="topbutton" onclick="logout()">خروج</button>
 <div class="logo">RAB<span>DAN</span></div>
-<button class="topbutton" onclick="loadFeed()">↻ تحديث</button>
+<button class="topbutton" onclick="loadExplore()">↻ تحديث</button>
 </header>
 <main>
 <section id="authPage" class="page active">
@@ -82,55 +101,86 @@ textarea{height:110px;resize:vertical}
 <div id="authMessage"></div>
 </div>
 </section>
-<section id="feedPage" class="page">
-<div style="padding:18px 15px;border-bottom:1px solid #292929">
-<div class="sectiontitle">الرئيسية</div>
-<textarea id="postText" placeholder="شو في خاطرك؟"></textarea>
-<button class="primary" onclick="createPost()">نشر المنشور</button>
+<section id="explorePage" class="page active">
+<div id="videoFeed">
+<div class="empty">جاري تحميل الفيديوهات...</div>
 </div>
-<div id="posts"><div class="empty">جاري تحميل المنشورات...</div></div>
+</section>
+<section id="uploadPage" class="page">
+<h2 class="sectiontitle">نشر فيديو جديد 🎥</h2>
+<div class="upload-box">
+<label class="file-label">
+<span>＋ اختر فيديو من ألبومك</span>
+<input type="file" id="videoFile" accept="video/*" onchange="previewVideo()">
+</label>
+<div id="fileName" class="muted"></div>
+<video id="videoPreview" class="preview" controls playsinline></video>
+<textarea id="videoCaption" maxlength="500" placeholder="اكتب وصف الفيديو..."></textarea>
+<button class="primary" id="uploadButton" onclick="uploadVideo()">نشر الفيديو</button>
+<div id="uploadMessage" class="muted"></div>
+</div>
 </section>
 <section id="searchPage" class="page">
-<div class="sectiontitle">البحث عن الأشخاص</div>
+<h2 class="sectiontitle">البحث عن الأشخاص</h2>
 <input id="searchInput" placeholder="ابحث باليوزر مثل rashid" oninput="searchUsers()">
 <div class="muted">اكتب اليوزر بدون علامة @</div>
 <div id="searchResults"></div>
 </section>
 <section id="profilePage" class="page">
-<button class="backbtn" id="profileBack" onclick="backFromProfile()">‹ رجوع</button>
+<button class="backbtn" id="profileBack" onclick="backFromProfile()" style="display:none">‹ رجوع</button>
 <div class="profiletop">
 <div class="bigavatar" id="profileAvatar">R</div>
 <h2 id="profileName">RABDAN</h2>
 <p class="muted" id="profileUsername"></p>
 <div class="stats">
-<div><strong id="postCount">0</strong>منشورات</div>
+<div><strong id="videoCount">0</strong>فيديوهات</div>
 <div><strong id="followerCount">0</strong>متابعين</div>
 <div><strong id="followingCount">0</strong>يتابع</div>
 </div>
 <div class="profile-actions" id="profileActions"></div>
 <div id="ownProfileButtons" style="display:none">
-<button class="smallbtn" onclick="editUsername()">تعديل اليوزر</button>
 <button class="secondary" onclick="logout()">تسجيل الخروج</button>
 </div>
 </div>
-<h3>المنشورات</h3>
-<div id="myPosts"></div>
+<h3>الفيديوهات</h3>
+<div id="myVideos" class="video-grid"></div>
 </section>
 </main>
 <nav class="bottom" id="navigation" style="display:none">
-<button class="active" onclick="showPage('feedPage',this)">⌂</button>
+<button class="active" onclick="showPage('explorePage',this)">⌂</button>
 <button onclick="showPage('searchPage',this)">⌕</button>
+<button onclick="showPage('uploadPage',this)">＋</button>
 <button onclick="showPage('profilePage',this)">◉</button>
 </nav>
+<div class="comment-overlay" id="commentOverlay" onclick="closeComments(event)">
+<div class="comment-panel" onclick="event.stopPropagation()">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<h3>التعليقات</h3>
+<button class="topbutton" onclick="closeComments()">✕</button>
+</div>
+<div id="commentList" class="comment-list"></div>
+<div class="comment-form">
+<input id="commentInput" placeholder="اكتب تعليقاً...">
+<button onclick="addVideoComment()">إرسال</button>
+</div>
+</div>
+</div>
 <script>
-const SUPABASE_URL = "https://vhdzhnevsyxvvebqpqig.supabase.co";
-const SUPABASE_KEY = "sb_publishable_ykrE9V_vuL5LO4N2EXZ3EA_Bo2ZaMSG";
-const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let currentUser = null;
-let currentProfile = null;
-let viewedProfileId = null;
-let isLogin = false;
-let searchTimer = null;
+const SUPABASE_URL="https://vhdzhnevsyxvvebqpqig.supabase.co";
+const SUPABASE_KEY="sb_publishable_ykrE9V_vuL5LO4N2EXZ3EA_Bo2ZaMSG";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser=null;
+let currentProfile=null;
+let viewedProfileId=null;
+let isLogin=false;
+let searchTimer=null;
+let activeCommentVideo=null;
+let videoObserver=null;
+function safe(value){
+return String(value??'').replace(/[&<>"']/g,c=>({
+'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
+}
 function message(text){
 document.getElementById('authMessage').innerText=text;
 }
@@ -150,7 +200,7 @@ if(!email||!password){message('اكتب البريد الإلكتروني وكل
 if(password.length<6){message('كلمة المرور لازم تكون 6 أحرف على الأقل.');return}
 if(!isLogin&&!name){message('اكتب اليوزر.');return}
 if(!isLogin&&!/^[a-zA-Z0-9_]{3,20}$/.test(name)){
-message('اليوزر لازم يكون بالإنجليزي أو الأرقام أو _، من 3 إلى 20 حرف.');
+message('اليوزر لازم يكون من 3 إلى 20 حرفاً.');
 return;
 }
 button.disabled=true;
@@ -161,14 +211,13 @@ if(isLogin){
 result=await db.auth.signInWithPassword({email,password});
 }else{
 result=await db.auth.signUp({
-email,
-password,
+email,password,
 options:{data:{username:name,display_name:name}}
 });
 }
 }catch(e){
 button.disabled=false;
-message('صار خطأ في الاتصال. حاول مرة ثانية.');
+message('صار خطأ في الاتصال.');
 return;
 }
 button.disabled=false;
@@ -180,28 +229,22 @@ if(!isLogin&&!result.data.session){
 message('تم إنشاء الحساب! افحص بريدك الإلكتروني واضغط رابط التأكيد، وبعدها سجّل الدخول.');
 return;
 }
-if(result.data.session){
-await startApp(result.data.user);
-}
+if(result.data.session)await startApp(result.data.user);
 }
 async function startApp(user){
 currentUser=user;
 await loadProfile();
-if(!currentProfile){
-alert('ما قدرنا نحمل بيانات حسابك. حاول تحديث الصفحة.');
-return;
-}
+if(!currentProfile)return;
 document.getElementById('authPage').classList.remove('active');
-document.getElementById('feedPage').classList.add('active');
 document.getElementById('navigation').style.display='flex';
-await loadFeed();
+showPage('explorePage',document.querySelector('.bottom button'));
+await loadExplore();
 }
 async function loadProfile(){
 const {data,error}=await db.from('profiles')
 .select('*').eq('id',currentUser.id).single();
-if(error){
-console.error(error);
-alert('تعذر تحميل الملف الشخصي: '+error.message);
+if(error||!data){
+alert('تعذر تحميل الملف الشخصي: '+(error?.message||''));
 currentProfile=null;
 return;
 }
@@ -213,148 +256,239 @@ document.getElementById(id).classList.add('active');
 document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
 if(button)button.classList.add('active');
 if(id==='profilePage'){
+document.getElementById('profileBack').style.display='none';
 viewedProfileId=currentUser.id;
-loadMyProfile();
+loadProfileView(currentUser.id);
 }
-if(id==='searchPage'){
-document.getElementById('searchInput').focus();
+if(id==='searchPage')document.getElementById('searchInput').focus();
+if(id==='explorePage')loadExplore();
 }
+/* VIDEO EXPLORE */
+function publicVideoUrl(path){
+return db.storage.from('videos').getPublicUrl(path).data.publicUrl;
 }
-async function createPost(){
-const input=document.getElementById('postText');
-const content=input.value.trim();
-if(!content){alert('اكتب شيئاً قبل النشر');return}
-const {error}=await db.from('posts').insert({
-user_id:currentUser.id,
-content:content
-});
-if(error){alert('تعذر النشر: '+error.message);return}
-input.value='';
-await loadFeed();
-alert('تم نشر منشورك بنجاح! 🎉');
-}
-async function loadFeed(){
-const container=document.getElementById('posts');
-container.innerHTML='<div class="empty">جاري تحميل المنشورات...</div>';
-const {data:posts,error}=await db.from('posts')
+async function loadExplore(){
+const container=document.getElementById('videoFeed');
+container.innerHTML='<div class="empty">جاري تحميل الفيديوهات...</div>';
+const {data:videos,error}=await db.from('videos')
 .select('*').order('created_at',{ascending:false}).limit(50);
 if(error){
-container.innerHTML='<div class="empty">خطأ في تحميل المنشورات: '+safe(error.message)+'</div>';
+container.innerHTML='<div class="empty">تعذر تحميل الفيديوهات: '+safe(error.message)+'</div>';
 return;
 }
-if(!posts.length){
-container.innerHTML='<div class="empty">ما في منشورات للحين. كن أول شخص ينشر! ✨</div>';
+if(!videos||!videos.length){
+container.innerHTML='<div class="empty">ما في فيديوهات للحين 🎥<br>كن أول شخص ينشر فيديو في RABDAN!</div>';
 return;
 }
-const ids=[...new Set(posts.map(p=>p.user_id))];
-const {data:profiles}=await db.from('profiles')
-.select('id,username,display_name').in('id',ids);
-const {data:likes}=await db.from('likes')
-.select('post_id,user_id').in('post_id',posts.map(p=>p.id));
-const {data:comments}=await db.from('comments')
-.select('id,post_id,user_id,content,created_at')
-.in('post_id',posts.map(p=>p.id))
-.order('created_at',{ascending:true});
+const ids=[...new Set(videos.map(v=>v.user_id))];
+const videoIds=videos.map(v=>v.id);
+const [{data:profiles},{data:likes},{data:comments},{data:follows}] = await Promise.all([
+db.from('profiles').select('id,username,display_name').in('id',ids),
+db.from('video_likes').select('video_id,user_id').in('video_id',videoIds),
+db.from('video_comments').select('video_id').in('video_id',videoIds),
+db.from('follows').select('following_id').eq('follower_id',currentUser.id).in('following_id',ids)
+]);
 const profileMap={};
 (profiles||[]).forEach(p=>profileMap[p.id]=p);
-container.innerHTML=posts.map(p=>{
-const profile=profileMap[p.user_id]||{};
-const userName=profile.display_name||profile.username||'مستخدم';
-const handle=profile.username?'@'+profile.username:'';
-const postLikes=(likes||[]).filter(l=>l.post_id===p.id);
+const followed=new Set((follows||[]).map(f=>f.following_id));
+container.innerHTML=videos.map(v=>{
+const p=profileMap[v.user_id]||{};
+const display=p.display_name||p.username||'مستخدم';
+const postLikes=(likes||[]).filter(l=>l.video_id===v.id);
 const liked=postLikes.some(l=>l.user_id===currentUser.id);
-const postComments=(comments||[]).filter(c=>c.post_id===p.id);
+const commentCount=(comments||[]).filter(c=>c.video_id===v.id).length;
+const following=followed.has(v.user_id);
+const own=v.user_id===currentUser.id;
 return `
-<article class="post">
-<div class="posthead">
-<div class="avatar">${safe(userName.charAt(0).toUpperCase())}</div>
-<div>
-<div class="username">${safe(userName)}</div>
-<div class="handle">${safe(handle)}</div>
-<div class="time">${new Date(p.created_at).toLocaleString('ar-AE')}</div>
+<article class="video-card" data-video="${v.id}">
+<video src="${safe(publicVideoUrl(v.video_path))}" autoplay muted loop playsinline preload="metadata"></video>
+<div class="video-gradient"></div>
+<div class="video-info">
+<div class="video-user" onclick="openProfile('${v.user_id}')">@${safe(p.username||display)}</div>
+<div class="video-caption">${safe(v.caption||'')}</div>
+<div class="video-date">${new Date(v.created_at).toLocaleDateString('ar-AE')}</div>
+${!own?`<button class="video-follow ${following?'following':''}" onclick="toggleFollow('${v.user_id}',${following})">${following?'تتابعه ✓':'متابعة +'}</button>`:''}
 </div>
-</div>
-<div class="caption">${safe(p.content||'')}</div>
-<div class="actions">
-<button onclick="toggleLike('${p.id}',${liked})">${liked?'♥':'♡'}</button>
-<button onclick="focusComment('${p.id}')">♧</button>
-</div>
-<div class="likes">${postLikes.length} إعجاب</div>
-${postComments.map(c=>{
-const cp=profileMap[c.user_id]||{};
-return `<div class="commentline"><b>${safe(cp.username?'@'+cp.username:cp.display_name||'مستخدم')}:</b> ${safe(c.content)}</div>`;
-}).join('')}
-<div class="commentbox">
-<input id="comment-${p.id}" placeholder="اكتب تعليقاً...">
-<button onclick="addComment('${p.id}')">إرسال</button>
+<div class="video-actions">
+<button onclick="toggleVideoLike('${v.id}',${liked})">${liked?'♥':'♡'}</button>
+<small>${postLikes.length}</small>
+<button onclick="openComments('${v.id}')">♧</button>
+<small>${commentCount}</small>
+<button class="sound-button" onclick="toggleSound(this)">🔇</button>
 </div>
 </article>`;
 }).join('');
+setupVideoObserver();
 }
-async function toggleLike(postId,alreadyLiked){
+function setupVideoObserver(){
+if(videoObserver)videoObserver.disconnect();
+videoObserver=new IntersectionObserver(entries=>{
+entries.forEach(entry=>{
+const video=entry.target.querySelector('video');
+if(!video)return;
+if(entry.isIntersecting&&entry.intersectionRatio>=0.6){
+video.play().catch(()=>{});
+}else{
+video.pause();
+}
+});
+},{threshold:[0,.6,1]});
+document.querySelectorAll('.video-card').forEach(card=>videoObserver.observe(card));
+}
+function toggleSound(button){
+const card=button.closest('.video-card');
+const video=card.querySelector('video');
+video.muted=!video.muted;
+button.innerText=video.muted?'🔇':'🔊';
+}
+async function toggleVideoLike(videoId,alreadyLiked){
 if(alreadyLiked){
-const {error}=await db.from('likes').delete()
-.eq('post_id',postId).eq('user_id',currentUser.id);
+const {error}=await db.from('video_likes').delete()
+.eq('video_id',videoId).eq('user_id',currentUser.id);
 if(error){alert(error.message);return}
 }else{
-const {error}=await db.from('likes').insert({
-post_id:postId,user_id:currentUser.id
+const {error}=await db.from('video_likes').insert({
+video_id:videoId,user_id:currentUser.id
 });
 if(error){alert(error.message);return}
 }
-await loadFeed();
+await loadExplore();
 }
-function focusComment(id){
-document.getElementById('comment-'+id)?.focus();
+async function openComments(videoId){
+activeCommentVideo=videoId;
+document.getElementById('commentOverlay').style.display='flex';
+document.getElementById('commentList').innerHTML='<div class="empty">جاري التحميل...</div>';
+const {data,error}=await db.from('video_comments')
+.select('*').eq('video_id',videoId)
+.order('created_at',{ascending:true});
+if(error){
+document.getElementById('commentList').innerHTML='<div class="empty">تعذر تحميل التعليقات.</div>';
+return;
 }
-async function addComment(postId){
-const input=document.getElementById('comment-'+postId);
+if(!data||!data.length){
+document.getElementById('commentList').innerHTML='<div class="empty">ما في تعليقات للحين.</div>';
+return;
+}
+const ids=[...new Set(data.map(c=>c.user_id))];
+const {data:profiles}=await db.from('profiles')
+.select('id,username,display_name').in('id',ids);
+const map={};
+(profiles||[]).forEach(p=>map[p.id]=p);
+document.getElementById('commentList').innerHTML=data.map(c=>{
+const p=map[c.user_id]||{};
+return `<div class="comment-row"><b>@${safe(p.username||p.display_name||'مستخدم')}</b><br>${safe(c.content)}</div>`;
+}).join('');
+}
+function closeComments(event){
+if(event&&event.target!==document.getElementById('commentOverlay'))return;
+document.getElementById('commentOverlay').style.display='none';
+activeCommentVideo=null;
+}
+async function addVideoComment(){
+const input=document.getElementById('commentInput');
 const content=input.value.trim();
-if(!content)return;
-const {error}=await db.from('comments').insert({
-post_id:postId,
+if(!content||!activeCommentVideo)return;
+const {error}=await db.from('video_comments').insert({
+video_id:activeCommentVideo,
 user_id:currentUser.id,
 content
 });
-if(error){alert('تعذر إضافة التعليق: '+error.message);return}
-await loadFeed();
+if(error){alert('تعذر إرسال التعليق: '+error.message);return}
+input.value='';
+await openComments(activeCommentVideo);
 }
-async function loadMyProfile(){
-viewedProfileId=currentUser.id;
-await loadProfileView(currentUser.id);
+/* UPLOAD */
+function previewVideo(){
+const file=document.getElementById('videoFile').files[0];
+const preview=document.getElementById('videoPreview');
+const name=document.getElementById('fileName');
+if(!file){
+preview.style.display='none';
+name.innerText='';
+return;
 }
+if(!file.type.startsWith('video/')){
+alert('اختَر ملف فيديو فقط.');
+document.getElementById('videoFile').value='';
+return;
+}
+if(file.size>50*1024*1024){
+alert('حجم الفيديو أكبر من 50 MB. اختَر فيديو أصغر.');
+document.getElementById('videoFile').value='';
+return;
+}
+name.innerText=file.name;
+preview.src=URL.createObjectURL(file);
+preview.style.display='block';
+}
+async function uploadVideo(){
+const file=document.getElementById('videoFile').files[0];
+const caption=document.getElementById('videoCaption').value.trim();
+const button=document.getElementById('uploadButton');
+const msg=document.getElementById('uploadMessage');
+if(!file){msg.innerText='اختَر فيديو أولاً.';return}
+if(!file.type.startsWith('video/')){msg.innerText='الملف لازم يكون فيديو.';return}
+if(file.size>50*1024*1024){msg.innerText='حجم الفيديو أكبر من 50 MB.';return}
+button.disabled=true;
+msg.innerText='جاري رفع الفيديو...';
+const cleanName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+const path=currentUser.id+'/'+Date.now()+'-'+cleanName;
+const {error:uploadError}=await db.storage.from('videos')
+.upload(path,file,{contentType:file.type,upsert:false});
+if(uploadError){
+button.disabled=false;
+msg.innerText='تعذر رفع الفيديو: '+uploadError.message;
+return;
+}
+const {error:insertError}=await db.from('videos').insert({
+user_id:currentUser.id,
+video_path:path,
+caption
+});
+if(insertError){
+await db.storage.from('videos').remove([path]);
+button.disabled=false;
+msg.innerText='تعذر حفظ بيانات الفيديو: '+insertError.message;
+return;
+}
+document.getElementById('videoFile').value='';
+document.getElementById('videoCaption').value='';
+document.getElementById('fileName').innerText='';
+document.getElementById('videoPreview').style.display='none';
+document.getElementById('videoPreview').src='';
+button.disabled=false;
+msg.innerText='تم نشر الفيديو بنجاح! 🎉';
+showPage('explorePage',document.querySelector('.bottom button'));
+await loadExplore();
+}
+/* PROFILE */
 async function loadProfileView(userId){
+viewedProfileId=userId;
 const {data:profile,error}=await db.from('profiles')
 .select('*').eq('id',userId).single();
 if(error||!profile){
-alert('تعذر تحميل الحساب: '+(error?.message||'الحساب غير موجود'));
+alert('تعذر تحميل الحساب.');
 return;
 }
 const isOwn=userId===currentUser.id;
-document.getElementById('profileName').innerText=
-profile.display_name||profile.username||'مستخدم';
-document.getElementById('profileUsername').innerText=
-'@'+(profile.username||'');
-document.getElementById('profileAvatar').innerText=
-(profile.display_name||profile.username||'R').charAt(0).toUpperCase();
-document.getElementById('ownProfileButtons').style.display=
-isOwn?'block':'none';
-const {data:posts,error:postsError}=await db.from('posts')
+document.getElementById('profileName').innerText=profile.display_name||profile.username||'مستخدم';
+document.getElementById('profileUsername').innerText='@'+(profile.username||'');
+document.getElementById('profileAvatar').innerText=(profile.display_name||profile.username||'R').charAt(0).toUpperCase();
+document.getElementById('ownProfileButtons').style.display=isOwn?'block':'none';
+document.getElementById('profileBack').style.display=isOwn?'none':'block';
+const {data:videos,error:videoError}=await db.from('videos')
 .select('*').eq('user_id',userId)
 .order('created_at',{ascending:false});
-if(postsError){
-document.getElementById('myPosts').innerHTML=
-'<div class="empty">تعذر تحميل المنشورات.</div>';
+if(videoError){
+document.getElementById('myVideos').innerHTML='<div class="empty">تعذر تحميل الفيديوهات.</div>';
 return;
 }
-const myPosts=posts||[];
-document.getElementById('postCount').innerText=myPosts.length;
+const list=videos||[];
+document.getElementById('videoCount').innerText=list.length;
 const {count:followers}=await db.from('follows')
-.select('*',{count:'exact',head:true})
-.eq('following_id',userId);
+.select('*',{count:'exact',head:true}).eq('following_id',userId);
 const {count:following}=await db.from('follows')
-.select('*',{count:'exact',head:true})
-.eq('follower_id',userId);
+.select('*',{count:'exact',head:true}).eq('follower_id',userId);
 document.getElementById('followerCount').innerText=followers||0;
 document.getElementById('followingCount').innerText=following||0;
 const actions=document.getElementById('profileActions');
@@ -367,92 +501,45 @@ const {data:follow}=await db.from('follows')
 .eq('following_id',userId)
 .maybeSingle();
 const isFollowing=!!follow;
-actions.innerHTML=`
-<button class="followbtn ${isFollowing?'following':''}"
-onclick="toggleFollow('${userId}',${isFollowing})">
-${isFollowing?'تتابعه ✓':'متابعة'}
-</button>`;
+actions.innerHTML=`<button class="followbtn ${isFollowing?'following':''}" onclick="toggleFollow('${userId}',${isFollowing})">${isFollowing?'تتابعه ✓':'متابعة'}</button>`;
 }
-document.getElementById('myPosts').innerHTML=myPosts.map(p=>`
-<div class="post">
-<div class="caption">${safe(p.content)}</div>
-<div class="time" style="padding:0 14px">
-${new Date(p.created_at).toLocaleString('ar-AE')}
+document.getElementById('myVideos').innerHTML=list.map(v=>`
+<div class="grid-video">
+<video src="${safe(publicVideoUrl(v.video_path))}" muted playsinline preload="metadata"></video>
+<button onclick="openProfileVideo('${v.id}')"></button>
+${isOwn?`<button class="delete-video" onclick="deleteVideo('${v.id}','${safe(v.video_path)}')">حذف</button>`:''}
 </div>
-</div>
-`).join('')||'<div class="empty">ما عنده منشورات للحين.</div>';
+`).join('')||'<div class="empty" style="grid-column:1/4">ما في فيديوهات للحين.</div>';
+}
+async function openProfileVideo(videoId){
+showPage('explorePage',document.querySelector('.bottom button'));
+await loadExplore();
+setTimeout(()=>{
+const card=document.querySelector(`[data-video="${videoId}"]`);
+if(card)card.scrollIntoView({behavior:'smooth'});
+},300);
+}
+async function deleteVideo(videoId,path){
+if(!confirm('متأكد تبا تحذف الفيديو؟'))return;
+const {error:storageError}=await db.storage.from('videos').remove([path]);
+if(storageError){alert('تعذر حذف ملف الفيديو: '+storageError.message);return}
+const {error}=await db.from('videos').delete()
+.eq('id',videoId).eq('user_id',currentUser.id);
+if(error){alert('تعذر حذف بيانات الفيديو: '+error.message);return}
+await loadProfileView(currentUser.id);
 }
 async function openProfile(userId){
-viewedProfileId=userId;
 document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
 document.getElementById('profilePage').classList.add('active');
 document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
 document.getElementById('profileName').innerText='جاري التحميل...';
-document.getElementById('myPosts').innerHTML='<div class="empty">جاري تحميل المنشورات...</div>';
+document.getElementById('myVideos').innerHTML='<div class="empty">جاري التحميل...</div>';
 await loadProfileView(userId);
 }
 function backFromProfile(){
 showPage('searchPage',document.querySelectorAll('.bottom button')[1]);
 }
-async function editUsername(){
-const oldName=currentProfile.username||'';
-const name=prompt('اكتب اليوزر الجديد بدون @:',oldName);
-if(name===null)return;
-const newName=name.trim().toLowerCase();
-if(!/^[a-zA-Z0-9_]{3,20}$/.test(newName)){
-alert('اليوزر لازم يكون من 3 إلى 20 حرفاً، وبالإنجليزي أو الأرقام أو _.');
-return;
-}
-if(newName===oldName){
-alert('هذا هو يوزرك الحالي.');
-return;
-}
-const {error}=await db.from('profiles')
-.update({username:newName})
-.eq('id',currentUser.id);
-if(error){
-if(error.code==='23505'||error.message.toLowerCase().includes('duplicate')){
-alert('هذا اليوزر مستخدم من شخص ثاني. اختَر غيره.');
-}else{
-alert('تعذر تعديل اليوزر: '+error.message);
-}
-return;
-}
-await loadProfile();
-await loadMyProfile();
-alert('تم تحديث اليوزر بنجاح! 🔥');
-}
-async function toggleFollow(userId,isFollowing){
-if(userId===currentUser.id){
-alert('ما تقدر تتابع نفسك!');
-return;
-}
-if(isFollowing){
-const {error}=await db.from('follows')
-.delete()
-.eq('follower_id',currentUser.id)
-.eq('following_id',userId);
-if(error){
-alert('تعذر إلغاء المتابعة: '+error.message);
-return;
-}
-}else{
-const {error}=await db.from('follows').insert({
-follower_id:currentUser.id,
-following_id:userId
-});
-if(error){
-alert('تعذر المتابعة: '+error.message);
-return;
-}
-}
-if(document.getElementById('searchPage').classList.contains('active')){
-await searchUsers();
-}
-if(document.getElementById('profilePage').classList.contains('active')){
-await loadProfileView(viewedProfileId);
-}
-}
+/* SEARCH */
 async function searchUsers(){
 const input=document.getElementById('searchInput');
 const results=document.getElementById('searchResults');
@@ -470,23 +557,20 @@ results.innerHTML='<div class="empty">جاري البحث...</div>';
 searchTimer=setTimeout(async()=>{
 const {data,error}=await db.from('profiles')
 .select('id,username,display_name')
-.ilike('username',query+'%')
-.limit(20);
+.ilike('username',query+'%').limit(20);
 if(error){
 results.innerHTML='<div class="empty">تعذر البحث: '+safe(error.message)+'</div>';
 return;
 }
 if(!data||!data.length){
-results.innerHTML='<div class="empty">ما حصلنا أي حساب بهذا اليوزر.</div>';
+results.innerHTML='<div class="empty">ما حصلنا أي حساب.</div>';
 return;
 }
 const ids=data.map(u=>u.id);
 const {data:follows,error:followError}=await db.from('follows')
-.select('following_id')
-.eq('follower_id',currentUser.id)
-.in('following_id',ids);
+.select('following_id').eq('follower_id',currentUser.id).in('following_id',ids);
 if(followError){
-results.innerHTML='<div class="empty">تعذر تحميل حالة المتابعة: '+safe(followError.message)+'</div>';
+results.innerHTML='<div class="empty">تعذر تحميل المتابعة.</div>';
 return;
 }
 const followingIds=(follows||[]).map(f=>f.following_id);
@@ -495,23 +579,36 @@ const display=user.display_name||user.username||'مستخدم';
 const isFollowing=followingIds.includes(user.id);
 return `
 <div class="userresult">
-<div class="avatar" onclick="openProfile('${user.id}')">
-${safe(display.charAt(0).toUpperCase())}
-</div>
+<div class="avatar" onclick="openProfile('${user.id}')">${safe(display.charAt(0).toUpperCase())}</div>
 <div class="userinfo" onclick="openProfile('${user.id}')">
 <div class="username">${safe(display)}</div>
 <div class="handle">@${safe(user.username||'')}</div>
 </div>
-${user.id===currentUser.id
-? '<span class="muted">أنت</span>'
-: `<button class="followbtn ${isFollowing?'following':''}"
-onclick="toggleFollow('${user.id}',${isFollowing})">
-${isFollowing?'تتابعه ✓':'متابعة'}
-</button>`}
+${user.id===currentUser.id?'<span class="muted">أنت</span>':`
+<button class="followbtn ${isFollowing?'following':''}" onclick="toggleFollow('${user.id}',${isFollowing})">${isFollowing?'تتابعه ✓':'متابعة'}</button>`}
 </div>`;
 }).join('');
 },350);
 }
+/* FOLLOW */
+async function toggleFollow(userId,isFollowing){
+if(userId===currentUser.id)return;
+if(isFollowing){
+const {error}=await db.from('follows').delete()
+.eq('follower_id',currentUser.id).eq('following_id',userId);
+if(error){alert('تعذر إلغاء المتابعة: '+error.message);return}
+}else{
+const {error}=await db.from('follows').insert({
+follower_id:currentUser.id,
+following_id:userId
+});
+if(error){alert('تعذر المتابعة: '+error.message);return}
+}
+if(document.getElementById('searchPage').classList.contains('active'))await searchUsers();
+if(document.getElementById('profilePage').classList.contains('active'))await loadProfileView(viewedProfileId);
+if(document.getElementById('explorePage').classList.contains('active'))await loadExplore();
+}
+/* LOGOUT */
 async function logout(){
 if(!currentUser)return;
 await db.auth.signOut();
@@ -521,22 +618,11 @@ document.getElementById('navigation').style.display='none';
 document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
 document.getElementById('authPage').classList.add('active');
 }
-function safe(value){
-return String(value??'').replace(/[&<>"']/g,c=>({
-'&':'&amp;',
-'<':'&lt;',
-'>':'&gt;',
-'"':'&quot;',
-"'":'&#39;'
-}[c]));
-}
 async function init(){
 const {data}=await db.auth.getSession();
-if(data.session){
-await startApp(data.session.user);
+if(data.session)await startApp(data.session.user);
 }
-}
-db.auth.onAuthStateChange((event,session)=>{
+db.auth.onAuthStateChange((event)=>{
 if(event==='SIGNED_OUT'){
 currentUser=null;
 currentProfile=null;
