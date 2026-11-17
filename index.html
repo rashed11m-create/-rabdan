@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#090909">
 <title>RABDAN</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{
 --safe-top:env(safe-area-inset-top,0px);
@@ -143,6 +144,9 @@ border:0;
 color:#aaa;
 font-size:23px;
 min-width:48px;
+display:flex;
+align-items:center;
+justify-content:center;
 }
 .bottom button.active{color:white}
 .empty{
@@ -163,6 +167,7 @@ background:#eee;
 color:#111;
 border-color:#eee;
 }
+
 /* EXPLORE */
 #videoFeed{
 height:calc(100dvh - 125px - var(--safe-top) - var(--safe-bottom));
@@ -257,6 +262,7 @@ font-weight:bold;
 background:#333;
 color:white;
 }
+
 /* UPLOAD */
 .upload-box{
 background:#151515;
@@ -283,6 +289,7 @@ border-radius:10px;
 display:none;
 margin-top:12px;
 }
+
 /* PROFILE */
 .profiletop{text-align:center;padding:15px 0}
 .bigavatar{
@@ -379,6 +386,7 @@ border-radius:6px;
 padding:5px;
 font-size:11px;
 }
+
 /* COMMENTS */
 .comment-overlay{
 display:none;
@@ -420,6 +428,7 @@ padding:0 14px;
 background:#eee;
 color:#111;
 }
+
 /* NOTIFICATIONS */
 .notification-heading{
 display:flex;
@@ -466,35 +475,44 @@ font-size:17px;
 }
 </style>
 </head>
+
 <body>
+
 <header>
 <button class="topbutton" onclick="logout()">خروج</button>
 <div class="logo">RAB<span>DAN</span></div>
 <button class="topbutton" onclick="loadExplore()">↻ تحديث</button>
 </header>
+
 <main>
+
 <!-- LOGIN -->
 <section id="authPage" class="page active">
 <div class="authbox">
 <div class="authlogo">RABDAN</div>
 <p class="muted" style="text-align:center">مجتمعك، عالمك، مكانك.</p>
+
 <div id="signupFields">
 <input id="signupName" placeholder="اختَر اليوزر بالإنجليزي">
 <p class="muted">من 3 إلى 20 حرفاً، ويسمح بالأرقام و _</p>
 </div>
+
 <input id="email" type="email" placeholder="البريد الإلكتروني">
 <input id="password" type="password" placeholder="كلمة المرور">
+
 <button class="primary" id="authButton" onclick="signup()">إنشاء حساب</button>
 <button class="secondary" id="switchButton" onclick="switchAuth()">عندي حساب — تسجيل الدخول</button>
 <div id="authMessage"></div>
 </div>
 </section>
+
 <!-- EXPLORE -->
 <section id="explorePage" class="page">
 <div id="videoFeed">
 <div class="empty">جاري تحميل الفيديوهات...</div>
 </div>
 </section>
+
 <!-- UPLOAD -->
 <section id="uploadPage" class="page">
 <h2 class="sectiontitle">نشر فيديو جديد 🎥</h2>
@@ -510,6 +528,7 @@ font-size:17px;
 <div id="uploadMessage" class="muted"></div>
 </div>
 </section>
+
 <!-- SEARCH -->
 <section id="searchPage" class="page">
 <h2 class="sectiontitle">البحث عن الأشخاص</h2>
@@ -517,6 +536,7 @@ font-size:17px;
 <div class="muted">اكتب اليوزر بدون علامة @</div>
 <div id="searchResults"></div>
 </section>
+
 <!-- NOTIFICATIONS -->
 <section id="notificationsPage" class="page">
 <div class="notification-heading">
@@ -527,6 +547,7 @@ font-size:17px;
 <div class="empty">جاري تحميل الإشعارات...</div>
 </div>
 </section>
+
 <!-- PROFILE -->
 <section id="profilePage" class="page">
 <button class="backbtn" id="profileBack" onclick="backFromProfile()" style="display:none">‹ رجوع</button>
@@ -547,18 +568,29 @@ font-size:17px;
 <h3>الفيديوهات</h3>
 <div id="myVideos" class="video-grid"></div>
 </section>
+
 </main>
+
 <!-- BOTTOM NAVIGATION -->
 <nav class="bottom" id="navigation" style="display:none">
-<button class="active" onclick="showPage('explorePage',this)">⌂</button>
-<button onclick="showPage('searchPage',this)">⌕</button>
-<button onclick="showPage('uploadPage',this)">＋</button>
-<button onclick="showNotifications(this)" style="position:relative">
+<button class="active" onclick="showPage('explorePage',this)" aria-label="الرئيسية">⌂</button>
+<button onclick="showPage('searchPage',this)" aria-label="البحث">⌕</button>
+<button onclick="showPage('uploadPage',this)" aria-label="نشر فيديو">＋</button>
+
+<button onclick="showNotifications(this)" style="position:relative" aria-label="الإشعارات">
 🔔
 <span id="notificationBadge" style="display:none;position:absolute;top:0;right:5px;background:red;color:white;border-radius:50%;font-size:10px;padding:3px 5px">0</span>
 </button>
-<button onclick="showPage('profilePage',this)">◉</button>
+
+<!-- PROFILE ICON: PERSON -->
+<button onclick="showPage('profilePage',this)" aria-label="الملف الشخصي">
+<svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="12" cy="8" r="4"></circle>
+<path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+</svg>
+</button>
 </nav>
+
 <!-- COMMENTS POPUP -->
 <div class="comment-overlay" id="commentOverlay" onclick="closeComments(event)">
 <div class="comment-panel" onclick="event.stopPropagation()">
@@ -573,10 +605,12 @@ font-size:17px;
 </div>
 </div>
 </div>
+
 <script>
 const SUPABASE_URL="https://vhdzhnevsyxvvebqpqig.supabase.co";
 const SUPABASE_KEY="sb_publishable_ykrE9V_vuL5LO4N2EXZ3EA_Bo2ZaMSG";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 let currentUser=null;
 let currentProfile=null;
 let viewedProfileId=null;
@@ -585,6 +619,8 @@ let searchTimer=null;
 let activeCommentVideo=null;
 let videoObserver=null;
 let notificationInterval=null;
+let soundUnlocked=false;
+
 function safe(value){
 return String(value??'').replace(/[&<>"']/g,c=>({
 '&':'&amp;',
@@ -594,9 +630,11 @@ return String(value??'').replace(/[&<>"']/g,c=>({
 "'":'&#39;'
 }[c]));
 }
+
 function message(text){
 document.getElementById('authMessage').innerText=text;
 }
+
 function switchAuth(){
 isLogin=!isLogin;
 document.getElementById('authButton').innerText=isLogin?'تسجيل الدخول':'إنشاء حساب';
@@ -604,31 +642,39 @@ document.getElementById('switchButton').innerText=isLogin?'إنشاء حساب �
 document.getElementById('signupFields').style.display=isLogin?'none':'block';
 message('');
 }
+
 /* AUTH */
 async function signup(){
 const email=document.getElementById('email').value.trim();
 const password=document.getElementById('password').value;
 const name=document.getElementById('signupName').value.trim().toLowerCase();
 const button=document.getElementById('authButton');
+
 if(!email||!password){
 message('اكتب البريد الإلكتروني وكلمة المرور.');
 return;
 }
+
 if(password.length<6){
 message('كلمة المرور لازم تكون 6 أحرف على الأقل.');
 return;
 }
+
 if(!isLogin&&!name){
 message('اكتب اليوزر.');
 return;
 }
+
 if(!isLogin&&!/^[a-zA-Z0-9_]{3,20}$/.test(name)){
 message('اليوزر لازم يكون من 3 إلى 20 حرفاً.');
 return;
 }
+
 button.disabled=true;
 message('جاري الاتصال...');
+
 let result;
+
 try{
 if(isLogin){
 result=await db.auth.signInWithPassword({email,password});
@@ -643,84 +689,113 @@ button.disabled=false;
 message('صار خطأ في الاتصال.');
 return;
 }
+
 button.disabled=false;
+
 if(result.error){
 message('خطأ: '+result.error.message);
 return;
 }
+
 if(!isLogin&&!result.data.session){
 message('تم إنشاء الحساب! افحص بريدك الإلكتروني واضغط رابط التأكيد، وبعدها سجّل الدخول.');
 return;
 }
+
 if(result.data.session)await startApp(result.data.user);
 }
+
 async function startApp(user){
 currentUser=user;
 await loadProfile();
+
 if(!currentProfile)return;
+
 document.getElementById('authPage').classList.remove('active');
 document.getElementById('navigation').style.display='flex';
+
 showPage('explorePage',document.querySelector('.bottom button'));
 await loadExplore();
 await loadNotifications();
 openSharedVideoFromUrl();
+
 if(notificationInterval)clearInterval(notificationInterval);
+
 notificationInterval=setInterval(()=>{
 if(currentUser)loadNotifications();
 },15000);
 }
+
 async function loadProfile(){
 const {data,error}=await db.from('profiles')
 .select('*').eq('id',currentUser.id).single();
+
 if(error||!data){
 alert('تعذر تحميل الملف الشخصي: '+(error?.message||''));
 currentProfile=null;
 return;
 }
+
 currentProfile=data;
 }
+
 function showPage(id,button){
 document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
 document.getElementById(id).classList.add('active');
+
 document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
+
 if(button)button.classList.add('active');
+
 if(id==='profilePage'){
 document.getElementById('profileBack').style.display='none';
 viewedProfileId=currentUser.id;
 loadProfileView(currentUser.id);
 }
+
 if(id==='searchPage')document.getElementById('searchInput').focus();
 if(id==='explorePage')loadExplore();
 }
+
 /* VIDEO EXPLORE */
 function publicVideoUrl(path){
 return db.storage.from('videos').getPublicUrl(path).data.publicUrl;
 }
+
 async function loadExplore(){
 if(!currentUser)return;
+
 const container=document.getElementById('videoFeed');
 container.innerHTML='<div class="empty">جاري تحميل الفيديوهات...</div>';
+
 const {data:videos,error}=await db.from('videos')
 .select('*').order('created_at',{ascending:false}).limit(50);
+
 if(error){
 container.innerHTML='<div class="empty">تعذر تحميل الفيديوهات: '+safe(error.message)+'</div>';
 return;
 }
+
 if(!videos||!videos.length){
 container.innerHTML='<div class="empty">ما في فيديوهات للحين 🎥<br>كن أول شخص ينشر فيديو في RABDAN!</div>';
 return;
 }
+
 const ids=[...new Set(videos.map(v=>v.user_id))];
 const videoIds=videos.map(v=>v.id);
+
 const [{data:profiles},{data:likes},{data:comments},{data:follows}] = await Promise.all([
 db.from('profiles').select('id,username,display_name').in('id',ids),
 db.from('video_likes').select('video_id,user_id').in('video_id',videoIds),
 db.from('video_comments').select('video_id').in('video_id',videoIds),
 db.from('follows').select('following_id').eq('follower_id',currentUser.id).in('following_id',ids)
 ]);
+
 const profileMap={};
 (profiles||[]).forEach(p=>profileMap[p.id]=p);
+
 const followed=new Set((follows||[]).map(f=>f.following_id));
+
 container.innerHTML=videos.map(v=>{
 const p=profileMap[v.user_id]||{};
 const display=p.display_name||p.username||'مستخدم';
@@ -729,64 +804,107 @@ const liked=postLikes.some(l=>l.user_id===currentUser.id);
 const commentCount=(comments||[]).filter(c=>c.video_id===v.id).length;
 const following=followed.has(v.user_id);
 const own=v.user_id===currentUser.id;
+
 return `
 <article class="video-card" data-video="${v.id}">
-<video src="${safe(publicVideoUrl(v.video_path))}" autoplay muted loop playsinline preload="metadata"></video>
+<video src="${safe(publicVideoUrl(v.video_path))}" autoplay loop playsinline preload="metadata"></video>
 <div class="video-gradient"></div>
+
 <div class="video-info">
 <div class="video-user" onclick="openProfile('${v.user_id}')">@${safe(p.username||display)}</div>
 <div class="video-caption">${safe(v.caption||'')}</div>
 <div class="video-date">${new Date(v.created_at).toLocaleDateString('ar-AE')}</div>
 ${!own?`<button class="video-follow ${following?'following':''}" onclick="toggleFollow('${v.user_id}',${following})">${following?'تتابعه ✓':'متابعة +'}</button>`:''}
 </div>
+
 <div class="video-actions">
 <button class="like-button" data-liked="${liked}" onclick="toggleVideoLike(this,'${v.id}')">${liked?'♥':'♡'}</button>
 <small>${postLikes.length}</small>
 <button onclick="openComments('${v.id}')">♧</button>
 <small>${commentCount}</small>
-<button class="sound-button" onclick="toggleSound(this)">🔇</button>
+<button class="sound-button" onclick="toggleSound(this)">🔊</button>
 <button onclick="shareVideo('${v.id}')">↗</button>
 <small>مشاركة</small>
 </div>
 </article>`;
 }).join('');
+
 setupVideoObserver();
 }
+
+/* VIDEO SOUND */
 function setupVideoObserver(){
 if(videoObserver)videoObserver.disconnect();
+
 videoObserver=new IntersectionObserver(entries=>{
 entries.forEach(entry=>{
 const video=entry.target.querySelector('video');
 if(!video)return;
+
 if(entry.isIntersecting&&entry.intersectionRatio>=0.6){
+video.muted=false;
 video.play().catch(()=>{});
 }else{
 video.pause();
 }
 });
 },{threshold:[0,.6,1]});
+
 document.querySelectorAll('.video-card').forEach(card=>videoObserver.observe(card));
 }
+
+/* UNLOCK AUDIO AFTER FIRST USER TOUCH */
+document.addEventListener('pointerdown',function enableVideoSound(){
+if(!currentUser)return;
+if(!document.getElementById('explorePage').classList.contains('active'))return;
+
+const visibleVideo=[...document.querySelectorAll('.video-card')].find(card=>{
+const rect=card.getBoundingClientRect();
+return rect.top<window.innerHeight&&rect.bottom>0;
+});
+
+if(!visibleVideo)return;
+
+const video=visibleVideo.querySelector('video');
+if(!video)return;
+
+video.muted=false;
+video.play().catch(()=>{});
+
+const soundButton=visibleVideo.querySelector('.sound-button');
+if(soundButton)soundButton.innerText='🔊';
+
+soundUnlocked=true;
+},{capture:true});
+
 function toggleSound(button){
 const card=button.closest('.video-card');
 const video=card.querySelector('video');
+
 video.muted=!video.muted;
 button.innerText=video.muted?'🔇':'🔊';
+
+if(!video.muted)video.play().catch(()=>{});
 }
+
 /* LIKES */
 async function toggleVideoLike(button,videoId){
 if(button.dataset.busy==='true')return;
+
 const alreadyLiked=button.dataset.liked==='true';
 const countElement=button.nextElementSibling;
 const oldCount=parseInt(countElement.innerText,10)||0;
 const newLiked=!alreadyLiked;
 const newCount=Math.max(0,oldCount+(newLiked?1:-1));
+
 button.dataset.busy='true';
 button.dataset.liked=String(newLiked);
 button.innerText=newLiked?'♥':'♡';
 countElement.innerText=newCount;
+
 try{
 let result;
+
 if(alreadyLiked){
 result=await db.from('video_likes').delete()
 .eq('video_id',videoId)
@@ -797,6 +915,7 @@ video_id:videoId,
 user_id:currentUser.id
 });
 }
+
 if(result.error){
 button.dataset.liked=String(alreadyLiked);
 button.innerText=alreadyLiked?'♥':'♡';
@@ -809,11 +928,14 @@ button.innerText=alreadyLiked?'♥':'♡';
 countElement.innerText=oldCount;
 alert('صار خطأ في الاتصال. حاول مرة ثانية.');
 }
+
 button.dataset.busy='false';
 }
+
 /* SHARE */
 async function shareVideo(videoId){
 const shareUrl=location.origin+location.pathname+'?video='+encodeURIComponent(videoId);
+
 try{
 if(navigator.share){
 await navigator.share({
@@ -823,19 +945,23 @@ url:shareUrl
 });
 return;
 }
+
 if(navigator.clipboard&&window.isSecureContext){
 await navigator.clipboard.writeText(shareUrl);
 alert('تم نسخ رابط الفيديو! تقدر ترسله لربعك.');
 return;
 }
+
 const temporary=document.createElement('textarea');
 temporary.value=shareUrl;
 temporary.style.position='fixed';
 temporary.style.opacity='0';
 document.body.appendChild(temporary);
 temporary.select();
+
 const copied=document.execCommand('copy');
 temporary.remove();
+
 if(copied){
 alert('تم نسخ رابط الفيديو! تقدر ترسله لربعك.');
 }else{
@@ -847,165 +973,215 @@ alert('تعذرت المشاركة. حاول مرة ثانية.');
 }
 }
 }
+
 function openSharedVideoFromUrl(){
 const videoId=new URLSearchParams(location.search).get('video');
 if(!videoId)return;
+
 setTimeout(()=>{
 const card=document.querySelector(`[data-video="${CSS.escape(videoId)}"]`);
 if(card)card.scrollIntoView({behavior:'smooth'});
 },500);
 }
+
 /* COMMENTS */
 async function openComments(videoId){
 activeCommentVideo=videoId;
 document.getElementById('commentOverlay').style.display='flex';
 document.getElementById('commentList').innerHTML='<div class="empty">جاري التحميل...</div>';
+
 const {data,error}=await db.from('video_comments')
 .select('*').eq('video_id',videoId)
 .order('created_at',{ascending:true});
+
 if(error){
 document.getElementById('commentList').innerHTML='<div class="empty">تعذر تحميل التعليقات.</div>';
 return;
 }
+
 if(!data||!data.length){
 document.getElementById('commentList').innerHTML='<div class="empty">ما في تعليقات للحين.</div>';
 return;
 }
+
 const ids=[...new Set(data.map(c=>c.user_id))];
+
 const {data:profiles}=await db.from('profiles')
 .select('id,username,display_name').in('id',ids);
+
 const map={};
 (profiles||[]).forEach(p=>map[p.id]=p);
+
 document.getElementById('commentList').innerHTML=data.map(c=>{
 const p=map[c.user_id]||{};
 return `<div class="comment-row"><b>@${safe(p.username||p.display_name||'مستخدم')}</b><br>${safe(c.content)}</div>`;
 }).join('');
 }
+
 function closeComments(event){
 if(event&&event.target!==document.getElementById('commentOverlay'))return;
+
 document.getElementById('commentOverlay').style.display='none';
 activeCommentVideo=null;
 }
+
 async function addVideoComment(){
 const input=document.getElementById('commentInput');
 const content=input.value.trim();
+
 if(!content||!activeCommentVideo)return;
+
 const {error}=await db.from('video_comments').insert({
 video_id:activeCommentVideo,
 user_id:currentUser.id,
 content
 });
+
 if(error){
 alert('تعذر إرسال التعليق: '+error.message);
 return;
 }
+
 input.value='';
 await openComments(activeCommentVideo);
 }
+
 /* UPLOAD */
 function previewVideo(){
 const file=document.getElementById('videoFile').files[0];
 const preview=document.getElementById('videoPreview');
 const name=document.getElementById('fileName');
+
 if(!file){
 preview.style.display='none';
 name.innerText='';
 return;
 }
+
 if(!file.type.startsWith('video/')){
 alert('اختَر ملف فيديو فقط.');
 document.getElementById('videoFile').value='';
 return;
 }
+
 if(file.size>50*1024*1024){
 alert('حجم الفيديو أكبر من 50 MB. اختَر فيديو أصغر.');
 document.getElementById('videoFile').value='';
 return;
 }
+
 name.innerText=file.name;
 preview.src=URL.createObjectURL(file);
 preview.style.display='block';
 }
+
 async function uploadVideo(){
 const file=document.getElementById('videoFile').files[0];
 const caption=document.getElementById('videoCaption').value.trim();
 const button=document.getElementById('uploadButton');
 const msg=document.getElementById('uploadMessage');
+
 if(!file){
 msg.innerText='اختَر فيديو أولاً.';
 return;
 }
+
 if(!file.type.startsWith('video/')){
 msg.innerText='الملف لازم يكون فيديو.';
 return;
 }
+
 if(file.size>50*1024*1024){
 msg.innerText='حجم الفيديو أكبر من 50 MB.';
 return;
 }
+
 button.disabled=true;
 msg.innerText='جاري رفع الفيديو...';
+
 const cleanName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
 const path=currentUser.id+'/'+Date.now()+'-'+cleanName;
+
 const {error:uploadError}=await db.storage.from('videos')
 .upload(path,file,{contentType:file.type,upsert:false});
+
 if(uploadError){
 button.disabled=false;
 msg.innerText='تعذر رفع الفيديو: '+uploadError.message;
 return;
 }
+
 const {error:insertError}=await db.from('videos').insert({
 user_id:currentUser.id,
 video_path:path,
 caption
 });
+
 if(insertError){
 await db.storage.from('videos').remove([path]);
 button.disabled=false;
 msg.innerText='تعذر حفظ بيانات الفيديو: '+insertError.message;
 return;
 }
+
 document.getElementById('videoFile').value='';
 document.getElementById('videoCaption').value='';
 document.getElementById('fileName').innerText='';
 document.getElementById('videoPreview').style.display='none';
 document.getElementById('videoPreview').src='';
+
 button.disabled=false;
 msg.innerText='تم نشر الفيديو بنجاح! 🎉';
+
 showPage('explorePage',document.querySelector('.bottom button'));
 await loadExplore();
 }
+
 /* PROFILE */
 async function loadProfileView(userId){
 viewedProfileId=userId;
+
 const {data:profile,error}=await db.from('profiles')
 .select('*').eq('id',userId).single();
+
 if(error||!profile){
 alert('تعذر تحميل الحساب.');
 return;
 }
+
 const isOwn=userId===currentUser.id;
+
 document.getElementById('profileName').innerText=profile.display_name||profile.username||'مستخدم';
 document.getElementById('profileUsername').innerText='@'+(profile.username||'');
 document.getElementById('profileAvatar').innerText=(profile.display_name||profile.username||'R').charAt(0).toUpperCase();
+
 document.getElementById('ownProfileButtons').style.display=isOwn?'block':'none';
 document.getElementById('profileBack').style.display=isOwn?'none':'block';
+
 const {data:videos,error:videoError}=await db.from('videos')
 .select('*').eq('user_id',userId)
 .order('created_at',{ascending:false});
+
 if(videoError){
 document.getElementById('myVideos').innerHTML='<div class="empty">تعذر تحميل الفيديوهات.</div>';
 return;
 }
+
 const list=videos||[];
+
 document.getElementById('videoCount').innerText=list.length;
+
 const {count:followers}=await db.from('follows')
 .select('*',{count:'exact',head:true}).eq('following_id',userId);
+
 const {count:following}=await db.from('follows')
 .select('*',{count:'exact',head:true}).eq('follower_id',userId);
+
 document.getElementById('followerCount').innerText=followers||0;
 document.getElementById('followingCount').innerText=following||0;
+
 const actions=document.getElementById('profileActions');
+
 if(isOwn){
 actions.innerHTML='';
 }else{
@@ -1014,9 +1190,12 @@ const {data:follow}=await db.from('follows')
 .eq('follower_id',currentUser.id)
 .eq('following_id',userId)
 .maybeSingle();
+
 const isFollowing=!!follow;
+
 actions.innerHTML=`<button class="followbtn ${isFollowing?'following':''}" onclick="toggleFollow('${userId}',${isFollowing})">${isFollowing?'تتابعه ✓':'متابعة'}</button>`;
 }
+
 document.getElementById('myVideos').innerHTML=list.map(v=>`
 <div class="grid-video">
 <video src="${safe(publicVideoUrl(v.video_path))}" muted playsinline preload="metadata"></video>
@@ -1025,97 +1204,129 @@ ${isOwn?`<button class="delete-video" onclick="deleteVideo('${v.id}','${safe(v.v
 </div>
 `).join('')||'<div class="empty" style="grid-column:1/4">ما في فيديوهات للحين.</div>';
 }
+
 async function openProfileVideo(videoId){
 showPage('explorePage',document.querySelector('.bottom button'));
 await loadExplore();
+
 setTimeout(()=>{
 const card=document.querySelector(`[data-video="${CSS.escape(videoId)}"]`);
 if(card)card.scrollIntoView({behavior:'smooth'});
 },300);
 }
+
 async function deleteVideo(videoId,path){
 if(!confirm('متأكد تبا تحذف الفيديو؟'))return;
+
 const {error:storageError}=await db.storage.from('videos').remove([path]);
+
 if(storageError){
 alert('تعذر حذف ملف الفيديو: '+storageError.message);
 return;
 }
+
 const {error}=await db.from('videos').delete()
 .eq('id',videoId).eq('user_id',currentUser.id);
+
 if(error){
 alert('تعذر حذف بيانات الفيديو: '+error.message);
 return;
 }
+
 await loadProfileView(currentUser.id);
 }
+
 async function openProfile(userId){
 document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
 document.getElementById('profilePage').classList.add('active');
+
 document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
+
 document.getElementById('profileName').innerText='جاري التحميل...';
 document.getElementById('myVideos').innerHTML='<div class="empty">جاري التحميل...</div>';
+
 await loadProfileView(userId);
 }
+
 function backFromProfile(){
 showPage('searchPage',document.querySelectorAll('.bottom button')[1]);
 }
+
 /* SEARCH */
 async function searchUsers(){
 const input=document.getElementById('searchInput');
 const results=document.getElementById('searchResults');
 const query=input.value.trim().replace(/^@/,'');
+
 clearTimeout(searchTimer);
+
 if(!query){
 results.innerHTML='<div class="empty">اكتب يوزر للبحث عنه.</div>';
 return;
 }
+
 if(!/^[a-zA-Z0-9_]{1,20}$/.test(query)){
 results.innerHTML='<div class="empty">اكتب يوزر صحيح.</div>';
 return;
 }
+
 results.innerHTML='<div class="empty">جاري البحث...</div>';
+
 searchTimer=setTimeout(async()=>{
 const {data,error}=await db.from('profiles')
 .select('id,username,display_name')
 .ilike('username',query+'%').limit(20);
+
 if(error){
 results.innerHTML='<div class="empty">تعذر البحث: '+safe(error.message)+'</div>';
 return;
 }
+
 if(!data||!data.length){
 results.innerHTML='<div class="empty">ما حصلنا أي حساب.</div>';
 return;
 }
+
 const ids=data.map(u=>u.id);
+
 const {data:follows,error:followError}=await db.from('follows')
 .select('following_id').eq('follower_id',currentUser.id).in('following_id',ids);
+
 if(followError){
 results.innerHTML='<div class="empty">تعذر تحميل المتابعة.</div>';
 return;
 }
+
 const followingIds=(follows||[]).map(f=>f.following_id);
+
 results.innerHTML=data.map(user=>{
 const display=user.display_name||user.username||'مستخدم';
 const isFollowing=followingIds.includes(user.id);
+
 return `
 <div class="userresult">
 <div class="avatar" onclick="openProfile('${user.id}')">${safe(display.charAt(0).toUpperCase())}</div>
+
 <div class="userinfo" onclick="openProfile('${user.id}')">
 <div class="username">${safe(display)}</div>
 <div class="handle">@${safe(user.username||'')}</div>
 </div>
+
 ${user.id===currentUser.id?'<span class="muted">أنت</span>':`
 <button class="followbtn ${isFollowing?'following':''}" onclick="toggleFollow('${user.id}',${isFollowing})">${isFollowing?'تتابعه ✓':'متابعة'}</button>`}
 </div>`;
 }).join('');
 },350);
 }
+
 /* FOLLOW */
 async function toggleFollow(userId,isFollowing){
 if(userId===currentUser.id)return;
+
 if(isFollowing){
 const {error}=await db.from('follows').delete()
 .eq('follower_id',currentUser.id).eq('following_id',userId);
+
 if(error){
 alert('تعذر إلغاء المتابعة: '+error.message);
 return;
@@ -1125,93 +1336,122 @@ const {error}=await db.from('follows').insert({
 follower_id:currentUser.id,
 following_id:userId
 });
+
 if(error){
 alert('تعذر المتابعة: '+error.message);
 return;
 }
 }
+
 if(document.getElementById('searchPage').classList.contains('active'))await searchUsers();
 if(document.getElementById('profilePage').classList.contains('active'))await loadProfileView(viewedProfileId);
 if(document.getElementById('explorePage').classList.contains('active'))await loadExplore();
 }
+
 /* NOTIFICATIONS */
 async function loadNotifications(){
 if(!currentUser)return;
+
 const list=document.getElementById('notificationList');
 const badge=document.getElementById('notificationBadge');
+
 const {data,error}=await db.from('notifications')
 .select('*')
 .eq('recipient_id',currentUser.id)
 .order('created_at',{ascending:false})
 .limit(50);
+
 if(error){
 list.innerHTML='<div class="empty">تعذر تحميل الإشعارات: '+safe(error.message)+'</div>';
 return;
 }
+
 const notifications=data||[];
 const unread=notifications.filter(n=>!n.is_read).length;
+
 badge.innerText=unread>99?'99+':unread;
 badge.style.display=unread?'block':'none';
+
 if(!notifications.length){
 list.innerHTML='<div class="empty">ما عندك إشعارات للحين 🔔</div>';
 return;
 }
+
 const actorIds=[...new Set(notifications.map(n=>n.actor_id))];
+
 const {data:profiles}=await db.from('profiles')
 .select('id,username,display_name')
 .in('id',actorIds);
+
 const profileMap={};
 (profiles||[]).forEach(p=>profileMap[p.id]=p);
+
 list.innerHTML=notifications.map(n=>{
 const p=profileMap[n.actor_id]||{};
 const username=p.username||p.display_name||'مستخدم';
+
 let text='';
 if(n.type==='like')text='أعجب بفيديوك ❤️';
 if(n.type==='comment')text='علّق على فيديوك 💬';
 if(n.type==='follow')text='بدأ بمتابعتك 👤';
+
 const date=new Date(n.created_at).toLocaleString('ar-AE');
+
 return `
 <div class="notification-item ${n.is_read?'':'unread'}"
 onclick="openNotification('${n.id}','${n.actor_id}','${n.video_id||''}')">
+
 <div class="avatar">${safe(username.charAt(0).toUpperCase())}</div>
+
 <div class="notification-text">
 <b>@${safe(username)}</b>
 <div>${text}</div>
 <div class="notification-time">${safe(date)}</div>
 </div>
+
 ${!n.is_read?'<span class="notification-dot">●</span>':''}
 </div>`;
 }).join('');
 }
+
 async function showNotifications(button){
 showPage('notificationsPage',button);
 await loadNotifications();
 }
+
 async function markAllNotificationsRead(){
 if(!currentUser)return;
+
 const {error}=await db.from('notifications')
 .update({is_read:true})
 .eq('recipient_id',currentUser.id)
 .eq('is_read',false);
+
 if(error){
 alert('تعذر تحديث الإشعارات: '+error.message);
 return;
 }
+
 await loadNotifications();
 }
+
 async function openNotification(notificationId,actorId,videoId){
 const {error}=await db.from('notifications')
 .update({is_read:true})
 .eq('id',notificationId)
 .eq('recipient_id',currentUser.id);
+
 if(error){
 alert('تعذر تحديث الإشعار: '+error.message);
 return;
 }
+
 await loadNotifications();
+
 if(videoId){
 showPage('explorePage',document.querySelector('.bottom button'));
 await loadExplore();
+
 setTimeout(()=>{
 const card=document.querySelector(`[data-video="${CSS.escape(videoId)}"]`);
 if(card)card.scrollIntoView({behavior:'smooth'});
@@ -1220,50 +1460,65 @@ if(card)card.scrollIntoView({behavior:'smooth'});
 await openProfile(actorId);
 }
 }
+
 /* LOGOUT */
 async function logout(){
 if(!currentUser)return;
+
 if(notificationInterval){
 clearInterval(notificationInterval);
 notificationInterval=null;
 }
+
 await db.auth.signOut();
+
 currentUser=null;
 currentProfile=null;
+
 document.getElementById('notificationBadge').style.display='none';
 document.getElementById('navigation').style.display='none';
+
 document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
 document.getElementById('authPage').classList.add('active');
 }
+
 /* DISABLE COPYING AND LONG PRESS */
 document.addEventListener('contextmenu',e=>{
 if(!e.target.closest('input,textarea'))e.preventDefault();
 });
+
 document.addEventListener('copy',e=>{
 if(!e.target.closest('input,textarea'))e.preventDefault();
 });
+
 document.addEventListener('cut',e=>{
 if(!e.target.closest('input,textarea'))e.preventDefault();
 });
+
 document.addEventListener('dragstart',e=>{
 e.preventDefault();
 });
+
 /* START */
 async function init(){
 const {data}=await db.auth.getSession();
 if(data.session)await startApp(data.session.user);
 }
+
 db.auth.onAuthStateChange((event)=>{
 if(event==='SIGNED_OUT'){
 currentUser=null;
 currentProfile=null;
+
 if(notificationInterval){
 clearInterval(notificationInterval);
 notificationInterval=null;
 }
 }
 });
+
 init();
 </script>
+
 </body>
 </html>
