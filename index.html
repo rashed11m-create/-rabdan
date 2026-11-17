@@ -30,20 +30,14 @@ color:white;
 font-family:Arial,sans-serif;
 overscroll-behavior:none;
 }
-body{
-padding-bottom:68px;
-}
+body{padding-bottom:68px}
 input,textarea{
 -webkit-user-select:text;
 user-select:text;
 -webkit-touch-callout:default;
 }
-button{
-cursor:pointer;
-}
-button:disabled{
-opacity:.5;
-}
+button{cursor:pointer}
+button:disabled{opacity:.5}
 header{
 height:calc(60px + var(--safe-top));
 padding:var(--safe-top) 16px 0;
@@ -61,29 +55,17 @@ font-size:25px;
 font-weight:900;
 letter-spacing:3px;
 }
-.logo span{
-color:#aaa;
-}
+.logo span{color:#aaa}
 .topbutton{
 background:none;
 border:0;
 color:white;
 font-size:13px;
 }
-main{
-max-width:540px;
-margin:auto;
-}
-.page{
-display:none;
-padding:18px;
-}
-.page.active{
-display:block;
-}
-#explorePage{
-padding:0;
-}
+main{max-width:540px;margin:auto}
+.page{display:none;padding:18px}
+.page.active{display:block}
+#explorePage{padding:0}
 .sectiontitle{
 font-size:22px;
 font-weight:bold;
@@ -99,10 +81,7 @@ color:white;
 margin:8px 0;
 font-size:15px;
 }
-textarea{
-height:100px;
-resize:vertical;
-}
+textarea{height:100px;resize:vertical}
 .primary{
 width:100%;
 padding:14px;
@@ -137,11 +116,7 @@ font-weight:900;
 letter-spacing:4px;
 margin:15px;
 }
-.muted{
-color:#888;
-font-size:13px;
-line-height:1.7;
-}
+.muted{color:#888;font-size:13px;line-height:1.7}
 #authMessage{
 font-size:13px;
 color:#ccc;
@@ -167,11 +142,9 @@ background:none;
 border:0;
 color:#aaa;
 font-size:23px;
-min-width:55px;
+min-width:48px;
 }
-.bottom button.active{
-color:white;
-}
+.bottom button.active{color:white}
 .empty{
 text-align:center;
 color:#888;
@@ -261,23 +234,15 @@ border-radius:50%;
 width:48px;
 height:48px;
 }
-.video-actions button:active{
-transform:scale(.9);
-}
+.video-actions button:active{transform:scale(.9)}
 .video-actions small{
 font-size:11px;
 color:white;
 margin-top:-17px;
 }
-.sound-button{
-font-size:21px!important;
-}
-.like-button{
-transition:transform .15s,color .15s;
-}
-.like-button[data-liked="true"]{
-color:#ff3158;
-}
+.sound-button{font-size:21px!important}
+.like-button{transition:transform .15s,color .15s}
+.like-button[data-liked="true"]{color:#ff3158}
 .video-follow{
 font-size:12px;
 padding:7px 10px;
@@ -292,6 +257,7 @@ font-weight:bold;
 background:#333;
 color:white;
 }
+/* UPLOAD */
 .upload-box{
 background:#151515;
 border:1px solid #333;
@@ -307,9 +273,7 @@ border-radius:12px;
 color:#ddd;
 margin:12px 0;
 }
-.file-label input{
-display:none;
-}
+.file-label input{display:none}
 .preview{
 width:100%;
 max-height:350px;
@@ -319,10 +283,8 @@ border-radius:10px;
 display:none;
 margin-top:12px;
 }
-.profiletop{
-text-align:center;
-padding:15px 0;
-}
+/* PROFILE */
+.profiletop{text-align:center;padding:15px 0}
 .bigavatar{
 width:85px;
 height:85px;
@@ -373,20 +335,9 @@ place-items:center;
 font-weight:bold;
 flex-shrink:0;
 }
-.userinfo{
-flex:1;
-min-width:0;
-cursor:pointer;
-}
-.username{
-font-weight:bold;
-font-size:14px;
-}
-.handle{
-color:#888;
-font-size:12px;
-margin-top:4px;
-}
+.userinfo{flex:1;min-width:0;cursor:pointer}
+.username{font-weight:bold;font-size:14px}
+.handle{color:#888;font-size:12px;margin-top:4px}
 .backbtn{
 background:none;
 border:0;
@@ -428,6 +379,7 @@ border-radius:6px;
 padding:5px;
 font-size:11px;
 }
+/* COMMENTS */
 .comment-overlay{
 display:none;
 position:fixed;
@@ -459,19 +411,54 @@ border-bottom:1px solid #333;
 font-size:13px;
 line-height:1.6;
 }
-.comment-form{
-display:flex;
-gap:7px;
-}
-.comment-form input{
-margin:5px 0;
-}
+.comment-form{display:flex;gap:7px}
+.comment-form input{margin:5px 0}
 .comment-form button{
 border:0;
 border-radius:8px;
 padding:0 14px;
 background:#eee;
 color:#111;
+}
+/* NOTIFICATIONS */
+.notification-heading{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+}
+.notification-heading .sectiontitle{margin-bottom:15px}
+.read-all{
+background:transparent;
+border:0;
+color:#ddd;
+font-size:12px;
+padding:8px 0;
+}
+.notification-item{
+display:flex;
+align-items:center;
+gap:12px;
+padding:14px 10px;
+border-bottom:1px solid #292929;
+border-radius:9px;
+margin-bottom:5px;
+cursor:pointer;
+}
+.notification-item.unread{background:#202020}
+.notification-text{
+flex:1;
+font-size:13px;
+line-height:1.6;
+}
+.notification-time{
+color:#888;
+font-size:11px;
+margin-top:5px;
+}
+.notification-dot{
+color:#ff3158;
+font-size:17px;
 }
 @media(max-width:400px){
 .video-info{left:75px}
@@ -486,6 +473,7 @@ color:#111;
 <button class="topbutton" onclick="loadExplore()">↻ تحديث</button>
 </header>
 <main>
+<!-- LOGIN -->
 <section id="authPage" class="page active">
 <div class="authbox">
 <div class="authlogo">RABDAN</div>
@@ -501,11 +489,13 @@ color:#111;
 <div id="authMessage"></div>
 </div>
 </section>
+<!-- EXPLORE -->
 <section id="explorePage" class="page">
 <div id="videoFeed">
 <div class="empty">جاري تحميل الفيديوهات...</div>
 </div>
 </section>
+<!-- UPLOAD -->
 <section id="uploadPage" class="page">
 <h2 class="sectiontitle">نشر فيديو جديد 🎥</h2>
 <div class="upload-box">
@@ -520,12 +510,24 @@ color:#111;
 <div id="uploadMessage" class="muted"></div>
 </div>
 </section>
+<!-- SEARCH -->
 <section id="searchPage" class="page">
 <h2 class="sectiontitle">البحث عن الأشخاص</h2>
 <input id="searchInput" placeholder="ابحث باليوزر مثل rashid" oninput="searchUsers()">
 <div class="muted">اكتب اليوزر بدون علامة @</div>
 <div id="searchResults"></div>
 </section>
+<!-- NOTIFICATIONS -->
+<section id="notificationsPage" class="page">
+<div class="notification-heading">
+<h2 class="sectiontitle">الإشعارات 🔔</h2>
+<button class="read-all" onclick="markAllNotificationsRead()">تحديد الكل كمقروء</button>
+</div>
+<div id="notificationList">
+<div class="empty">جاري تحميل الإشعارات...</div>
+</div>
+</section>
+<!-- PROFILE -->
 <section id="profilePage" class="page">
 <button class="backbtn" id="profileBack" onclick="backFromProfile()" style="display:none">‹ رجوع</button>
 <div class="profiletop">
@@ -546,12 +548,18 @@ color:#111;
 <div id="myVideos" class="video-grid"></div>
 </section>
 </main>
+<!-- BOTTOM NAVIGATION -->
 <nav class="bottom" id="navigation" style="display:none">
 <button class="active" onclick="showPage('explorePage',this)">⌂</button>
 <button onclick="showPage('searchPage',this)">⌕</button>
 <button onclick="showPage('uploadPage',this)">＋</button>
+<button onclick="showNotifications(this)" style="position:relative">
+🔔
+<span id="notificationBadge" style="display:none;position:absolute;top:0;right:5px;background:red;color:white;border-radius:50%;font-size:10px;padding:3px 5px">0</span>
+</button>
 <button onclick="showPage('profilePage',this)">◉</button>
 </nav>
+<!-- COMMENTS POPUP -->
 <div class="comment-overlay" id="commentOverlay" onclick="closeComments(event)">
 <div class="comment-panel" onclick="event.stopPropagation()">
 <div style="display:flex;justify-content:space-between;align-items:center">
@@ -576,6 +584,7 @@ let isLogin=false;
 let searchTimer=null;
 let activeCommentVideo=null;
 let videoObserver=null;
+let notificationInterval=null;
 function safe(value){
 return String(value??'').replace(/[&<>"']/g,c=>({
 '&':'&amp;',
@@ -595,6 +604,7 @@ document.getElementById('switchButton').innerText=isLogin?'إنشاء حساب �
 document.getElementById('signupFields').style.display=isLogin?'none':'block';
 message('');
 }
+/* AUTH */
 async function signup(){
 const email=document.getElementById('email').value.trim();
 const password=document.getElementById('password').value;
@@ -652,7 +662,12 @@ document.getElementById('authPage').classList.remove('active');
 document.getElementById('navigation').style.display='flex';
 showPage('explorePage',document.querySelector('.bottom button'));
 await loadExplore();
+await loadNotifications();
 openSharedVideoFromUrl();
+if(notificationInterval)clearInterval(notificationInterval);
+notificationInterval=setInterval(()=>{
+if(currentUser)loadNotifications();
+},15000);
 }
 async function loadProfile(){
 const {data,error}=await db.from('profiles')
@@ -682,6 +697,7 @@ function publicVideoUrl(path){
 return db.storage.from('videos').getPublicUrl(path).data.publicUrl;
 }
 async function loadExplore(){
+if(!currentUser)return;
 const container=document.getElementById('videoFeed');
 container.innerHTML='<div class="empty">جاري تحميل الفيديوهات...</div>';
 const {data:videos,error}=await db.from('videos')
@@ -757,7 +773,7 @@ const video=card.querySelector('video');
 video.muted=!video.muted;
 button.innerText=video.muted?'🔇':'🔊';
 }
-/* FAST LIKE */
+/* LIKES */
 async function toggleVideoLike(button,videoId){
 if(button.dataset.busy==='true')return;
 const alreadyLiked=button.dataset.liked==='true';
@@ -795,7 +811,7 @@ alert('صار خطأ في الاتصال. حاول مرة ثانية.');
 }
 button.dataset.busy='false';
 }
-/* SHARE VIDEO */
+/* SHARE */
 async function shareVideo(videoId){
 const shareUrl=location.origin+location.pathname+'?video='+encodeURIComponent(videoId);
 try{
@@ -836,9 +852,7 @@ const videoId=new URLSearchParams(location.search).get('video');
 if(!videoId)return;
 setTimeout(()=>{
 const card=document.querySelector(`[data-video="${CSS.escape(videoId)}"]`);
-if(card){
-card.scrollIntoView({behavior:'smooth'});
-}
+if(card)card.scrollIntoView({behavior:'smooth'});
 },500);
 }
 /* COMMENTS */
@@ -1120,12 +1134,103 @@ if(document.getElementById('searchPage').classList.contains('active'))await sear
 if(document.getElementById('profilePage').classList.contains('active'))await loadProfileView(viewedProfileId);
 if(document.getElementById('explorePage').classList.contains('active'))await loadExplore();
 }
+/* NOTIFICATIONS */
+async function loadNotifications(){
+if(!currentUser)return;
+const list=document.getElementById('notificationList');
+const badge=document.getElementById('notificationBadge');
+const {data,error}=await db.from('notifications')
+.select('*')
+.eq('recipient_id',currentUser.id)
+.order('created_at',{ascending:false})
+.limit(50);
+if(error){
+list.innerHTML='<div class="empty">تعذر تحميل الإشعارات: '+safe(error.message)+'</div>';
+return;
+}
+const notifications=data||[];
+const unread=notifications.filter(n=>!n.is_read).length;
+badge.innerText=unread>99?'99+':unread;
+badge.style.display=unread?'block':'none';
+if(!notifications.length){
+list.innerHTML='<div class="empty">ما عندك إشعارات للحين 🔔</div>';
+return;
+}
+const actorIds=[...new Set(notifications.map(n=>n.actor_id))];
+const {data:profiles}=await db.from('profiles')
+.select('id,username,display_name')
+.in('id',actorIds);
+const profileMap={};
+(profiles||[]).forEach(p=>profileMap[p.id]=p);
+list.innerHTML=notifications.map(n=>{
+const p=profileMap[n.actor_id]||{};
+const username=p.username||p.display_name||'مستخدم';
+let text='';
+if(n.type==='like')text='أعجب بفيديوك ❤️';
+if(n.type==='comment')text='علّق على فيديوك 💬';
+if(n.type==='follow')text='بدأ بمتابعتك 👤';
+const date=new Date(n.created_at).toLocaleString('ar-AE');
+return `
+<div class="notification-item ${n.is_read?'':'unread'}"
+onclick="openNotification('${n.id}','${n.actor_id}','${n.video_id||''}')">
+<div class="avatar">${safe(username.charAt(0).toUpperCase())}</div>
+<div class="notification-text">
+<b>@${safe(username)}</b>
+<div>${text}</div>
+<div class="notification-time">${safe(date)}</div>
+</div>
+${!n.is_read?'<span class="notification-dot">●</span>':''}
+</div>`;
+}).join('');
+}
+async function showNotifications(button){
+showPage('notificationsPage',button);
+await loadNotifications();
+}
+async function markAllNotificationsRead(){
+if(!currentUser)return;
+const {error}=await db.from('notifications')
+.update({is_read:true})
+.eq('recipient_id',currentUser.id)
+.eq('is_read',false);
+if(error){
+alert('تعذر تحديث الإشعارات: '+error.message);
+return;
+}
+await loadNotifications();
+}
+async function openNotification(notificationId,actorId,videoId){
+const {error}=await db.from('notifications')
+.update({is_read:true})
+.eq('id',notificationId)
+.eq('recipient_id',currentUser.id);
+if(error){
+alert('تعذر تحديث الإشعار: '+error.message);
+return;
+}
+await loadNotifications();
+if(videoId){
+showPage('explorePage',document.querySelector('.bottom button'));
+await loadExplore();
+setTimeout(()=>{
+const card=document.querySelector(`[data-video="${CSS.escape(videoId)}"]`);
+if(card)card.scrollIntoView({behavior:'smooth'});
+},400);
+}else{
+await openProfile(actorId);
+}
+}
 /* LOGOUT */
 async function logout(){
 if(!currentUser)return;
+if(notificationInterval){
+clearInterval(notificationInterval);
+notificationInterval=null;
+}
 await db.auth.signOut();
 currentUser=null;
 currentProfile=null;
+document.getElementById('notificationBadge').style.display='none';
 document.getElementById('navigation').style.display='none';
 document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
 document.getElementById('authPage').classList.add('active');
@@ -1152,6 +1257,10 @@ db.auth.onAuthStateChange((event)=>{
 if(event==='SIGNED_OUT'){
 currentUser=null;
 currentProfile=null;
+if(notificationInterval){
+clearInterval(notificationInterval);
+notificationInterval=null;
+}
 }
 });
 init();
